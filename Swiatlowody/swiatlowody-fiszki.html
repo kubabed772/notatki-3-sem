@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiszki ze światłowodów</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e12;
+    --panel:#11171d;
+    --panel2:#0d1217;
+    --line:#212b32;
+    --line2:#2a363f;
+    --text:#e9eef1;
+    --dim:#84939c;
+    --dim2:#4d5a63;
+
+    --quiz:#3ec9c2;       /* glowny akcent */
+    --quiz-l:rgba(62,201,194,.14);
+    --know:#5fb86a;
+    --know-l:rgba(95,184,106,.15);
+    --dontknow:#e0584a;
+    --dontknow-l:rgba(224,88,74,.15);
+    --amber:#f2a93b;
+    --amber-l:rgba(242,169,59,.14);
+
+    --disp:'Space Grotesk',sans-serif;
+    --body:'Inter',sans-serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
+  ::selection{background:var(--quiz);color:#06121c}
+
+  .hero{position:relative;overflow:hidden;padding:78px 0 44px;border-bottom:1px solid var(--line)}
+  .hero::before{content:'';position:absolute;inset:-20% -10%;
+    background:repeating-linear-gradient(135deg, transparent 0 42px, rgba(255,255,255,.02) 43px);
+    pointer-events:none}
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--quiz);margin:0 0 18px;font-weight:600;position:relative;z-index:1}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(2rem,5vw,3.1rem);line-height:1.1;
+    margin:0 0 18px;letter-spacing:-.015em;position:relative;z-index:1}
+  h1 .acc{color:var(--quiz)}
+  .lede{font-size:1.02rem;color:var(--dim);max-width:60ch;margin:0;position:relative;z-index:1}
+  .lede strong{color:var(--text);font-weight:500}
+  .hero-stats{display:flex;gap:9px;flex-wrap:wrap;margin-top:24px;position:relative;z-index:1}
+  .hero-stats span{font-family:var(--mono);font-size:.72rem;border:1px solid var(--line2);border-radius:999px;
+    padding:6px 13px;color:var(--dim)}
+
+  main{padding:48px 0 80px}
+
+  /* ---------- SETUP SCREEN ---------- */
+  #setupScreen .topic-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0 28px}
+  @media(max-width:540px){#setupScreen .topic-grid{grid-template-columns:1fr}}
+  .topic-card{background:var(--panel);border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;
+    cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:all .15s;user-select:none}
+  .topic-card:hover{border-color:var(--line2)}
+  .topic-card.checked{border-color:var(--quiz);background:var(--quiz-l)}
+  .topic-card .tname{font-family:var(--disp);font-weight:600;font-size:.92rem}
+  .topic-card .tcount{font-family:var(--mono);font-size:.74rem;color:var(--dim);background:var(--panel2);
+    border-radius:999px;padding:3px 10px}
+  .topic-card.checked .tcount{color:var(--quiz);background:rgba(62,201,194,.18)}
+  .topic-card .check{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--line2);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:.7rem;color:transparent;margin-right:10px}
+  .topic-card.checked .check{border-color:var(--quiz);background:var(--quiz);color:#06121c}
+  .topic-row-inner{display:flex;align-items:center}
+
+  .setup-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;align-items:center}
+  .btn{font-family:var(--mono);font-size:.84rem;font-weight:600;background:var(--quiz-l);border:1.5px solid var(--quiz);
+    color:var(--quiz);padding:13px 24px;border-radius:10px;cursor:pointer;transition:all .15s}
+  .btn:hover{background:var(--quiz);color:#06121c}
+  .btn.sec{background:transparent;border-color:var(--line2);color:var(--dim);padding:13px 20px}
+  .btn.sec:hover{border-color:var(--text);color:var(--text)}
+  .btn:disabled{opacity:.35;cursor:not-allowed}
+  .selcount{font-family:var(--mono);font-size:.82rem;color:var(--dim)}
+
+  .exam-gen-box{margin-top:36px;padding-top:28px;border-top:1px solid var(--line)}
+  .exam-gen-box h3{font-family:var(--disp);font-weight:600;font-size:1.1rem;margin:0 0 8px}
+  .exam-gen-box > p{color:var(--dim);font-size:.88rem;margin:0 0 18px;max-width:62ch}
+  .exam-tpl-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:560px){.exam-tpl-grid{grid-template-columns:1fr}}
+  .exam-tpl{background:var(--panel);border:1.5px solid var(--line);border-radius:13px;padding:18px 20px;
+    cursor:pointer;transition:all .15s;text-align:left}
+  .exam-tpl:hover{border-color:var(--amber);background:var(--amber-l)}
+  .exam-tpl .et-name{font-family:var(--disp);font-weight:600;font-size:1rem;color:var(--text);margin-bottom:4px}
+  .exam-tpl .et-meta{font-family:var(--mono);font-size:.74rem;color:var(--amber);margin-bottom:8px}
+  .exam-tpl .et-desc{font-size:.82rem;color:var(--dim);line-height:1.5}
+
+  .exam-banner{background:var(--amber-l);border:1.5px solid var(--amber);border-radius:12px;padding:14px 18px;
+    margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+  .exam-banner .eb-name{font-family:var(--disp);font-weight:600;color:var(--amber);font-size:.94rem}
+  .exam-banner .eb-timer{font-family:var(--mono);font-weight:700;color:var(--amber);font-size:1.1rem}
+
+  /* ---------- EXAM PAPER (wszystkie pytania naraz) ---------- */
+  #examPaperScreen{display:none}
+  .exam-paper-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;
+    margin-bottom:10px;position:sticky;top:0;background:var(--bg);padding:14px 0;z-index:20;border-bottom:1px solid var(--line)}
+  .ep-name{font-family:var(--disp);font-weight:700;font-size:1.15rem;color:var(--amber)}
+  .ep-progress{font-family:var(--mono);font-size:.8rem;color:var(--dim);margin-top:3px}
+  .ep-actions{display:flex;gap:9px;flex-wrap:wrap}
+
+  .exam-q{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin:18px 0}
+  .exam-q.graded{border-color:var(--line2)}
+  .exam-q .eq-num{font-family:var(--mono);font-size:.74rem;color:var(--amber);font-weight:700;margin-bottom:8px}
+  .exam-q .fc-tag{display:inline-block;font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.04em;
+    background:var(--quiz-l);color:var(--quiz);border-radius:7px;padding:5px 11px;margin-bottom:14px}
+  .exam-q .fc-title{font-family:var(--disp);font-weight:600;font-size:1.1rem;line-height:1.4;margin:0 0 12px;color:var(--text)}
+  .exam-q .fc-body{font-size:.95rem;color:var(--dim)}
+  .exam-q .fc-body p{margin:0 0 10px} .exam-q .fc-body p:last-child{margin-bottom:0}
+  .exam-q .fc-body code{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:5px;
+    padding:1px 7px;font-size:.88em;color:#c9e3f5}
+  .exam-q .eq-reveal-wrap{margin-top:18px}
+  .exam-q .eq-answer{display:none;margin-top:18px;padding-top:18px;border-top:1px dashed var(--line2)}
+  .exam-q .eq-answer.show{display:block;animation:fadein .2s ease}
+  .exam-q .eq-grade-row{display:flex;gap:10px;margin-top:18px}
+  .exam-q .grade-btn{flex:1;font-family:var(--disp);font-weight:600;font-size:.9rem;padding:13px;border-radius:10px;
+    cursor:pointer;transition:all .15s;border:1.5px solid var(--line2);background:var(--panel2);color:var(--dim)}
+  .exam-q .grade-btn.active-know{border-color:var(--know);color:var(--know);background:var(--know-l)}
+  .exam-q .grade-btn.active-dontknow{border-color:var(--dontknow);color:var(--dontknow);background:var(--dontknow-l)}
+  .exam-q .eq-graded-pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.76rem;
+    font-weight:600;padding:6px 13px;border-radius:999px;margin-top:14px}
+  .exam-q .eq-graded-pill.know{background:var(--know-l);color:var(--know)}
+  .exam-q .eq-graded-pill.dontknow{background:var(--dontknow-l);color:var(--dontknow)}
+
+  .ep-finish-banner{text-align:center;padding:30px 0 10px}
+  .ep-finish-banner p{color:var(--dim);font-size:.9rem;margin:0 0 16px}
+
+  /* ---------- QUIZ SCREEN ---------- */
+  #quizScreen{display:none}
+  .quiz-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+  .progress-text{font-family:var(--mono);font-size:.78rem;color:var(--dim)}
+  .live-score{font-family:var(--mono);font-size:.78rem;display:flex;gap:14px}
+  .live-score .k{color:var(--know)} .live-score .d{color:var(--dontknow)}
+  .progress-bar{height:5px;background:var(--panel2);border-radius:99px;overflow:hidden;margin-bottom:26px}
+  .progress-fill{height:100%;background:var(--quiz);border-radius:99px;transition:width .25s}
+
+  .flashcard{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:30px 28px;min-height:200px}
+  .fc-tag{display:inline-block;font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.04em;
+    background:var(--quiz-l);color:var(--quiz);border-radius:7px;padding:5px 11px;margin-bottom:16px}
+  .fc-title{font-family:var(--disp);font-weight:600;font-size:1.18rem;line-height:1.4;margin:0 0 14px;color:var(--text)}
+  .fc-body{font-size:.96rem;color:var(--dim)}
+  .fc-body p{margin:0 0 10px} .fc-body p:last-child{margin-bottom:0}
+  .fc-body code{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:5px;
+    padding:1px 7px;font-size:.88em;color:#c9e3f5}
+
+  .fc-divider{border:none;border-top:1px dashed var(--line2);margin:24px 0}
+
+  .fc-answer{display:none}
+  .fc-answer.show{display:block;animation:fadein .2s ease}
+  @keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+  .fc-answer h5{font-family:var(--disp);font-weight:600;color:var(--know);margin:0 0 12px;font-size:1rem}
+  .fc-answer p{font-size:.94rem;color:var(--dim);margin:0 0 11px;line-height:1.7}
+  .fc-answer p:last-child{margin-bottom:0}
+  .fc-answer strong{color:var(--text);font-weight:600}
+  .fc-answer code{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:5px;
+    padding:1px 7px;font-size:.88em;color:#c9e3f5}
+
+  .fc-answer table.tm{width:100%;border-collapse:collapse;margin:10px 0 14px;font-family:var(--mono);font-size:.82rem}
+  .fc-answer table.tm th,.fc-answer table.tm td{border:1px solid var(--line);padding:7px 10px;text-align:center}
+  .fc-answer table.tm th{background:var(--panel2);color:var(--dim);font-weight:600;font-size:.72rem;text-transform:uppercase}
+  .fc-answer table.tm td.state{color:var(--quiz);font-weight:600}
+
+  .fc-answer .formula{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:14px 18px;
+    text-align:center;font-family:var(--mono);font-size:1.02rem;margin:10px 0;color:var(--text)}
+  .fc-answer .note{font-size:.86rem;color:var(--dim2);border-left:3px solid var(--line2);padding:2px 0 2px 12px;margin-top:10px}
+  .fc-answer .pill{display:inline-block;font-family:var(--mono);font-size:.68rem;font-weight:600;border-radius:6px;
+    padding:2px 8px;background:var(--amber-l);color:var(--amber);margin-right:6px}
+  .fc-answer a.jump{display:inline-block;font-family:var(--mono);font-size:.72rem;font-weight:600;text-decoration:none;
+    color:#06121c;background:var(--quiz);border-radius:6px;padding:4px 10px;margin-top:6px}
+
+  pre.cpp{position:relative;font-family:var(--mono);font-size:.82rem;line-height:1.7;background:var(--bg);
+    color:#dce7ea;border-radius:10px;padding:14px 16px;margin:10px 0;overflow-x:auto;border:1px solid var(--line)}
+  pre.cpp code{white-space:pre;display:block}
+  pre.cpp .kw{color:#7fc7e8;font-weight:600}
+  pre.cpp .tp{color:#9fd9b4;font-weight:600}
+  pre.cpp .cm{color:#64808c;font-style:italic}
+  pre.cpp .st{color:#e3b56b}
+  pre.cpp .nm{color:#d99a8f}
+
+  .reveal-wrap{margin-top:22px;text-align:center}
+  .reveal-btn-big{font-family:var(--mono);font-size:.88rem;font-weight:600;background:var(--quiz-l);
+    border:1.5px solid var(--quiz);color:var(--quiz);padding:13px 28px;border-radius:10px;cursor:pointer;transition:all .15s}
+  .reveal-btn-big:hover{background:var(--quiz);color:#06121c}
+
+  .grade-row{display:flex;gap:12px;margin-top:24px}
+  .grade-btn{flex:1;font-family:var(--disp);font-weight:600;font-size:.96rem;padding:16px;border-radius:12px;
+    cursor:pointer;transition:all .15s;border:1.5px solid var(--line2);background:var(--panel2);color:var(--dim)}
+  .grade-btn.know:hover{border-color:var(--know);color:var(--know);background:var(--know-l)}
+  .grade-btn.dontknow:hover{border-color:var(--dontknow);color:var(--dontknow);background:var(--dontknow-l)}
+
+  .quiz-foot{display:flex;justify-content:space-between;margin-top:18px}
+  .quiz-foot .btn.sec{padding:9px 16px;font-size:.76rem}
+
+  /* ---------- RESULTS SCREEN ---------- */
+  #resultsScreen{display:none;text-align:center}
+  .result-ring{width:160px;height:160px;margin:20px auto 24px;position:relative}
+  .result-ring svg{transform:rotate(-90deg)}
+  .result-ring .pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-family:var(--disp);font-weight:700;font-size:2rem;color:var(--text)}
+  .result-headline{font-family:var(--disp);font-weight:600;font-size:1.3rem;margin:0 0 8px}
+  .result-sub{color:var(--dim);font-size:.94rem;margin:0 0 28px}
+  .result-stats{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:32px}
+  .rstat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 22px;min-width:110px}
+  .rstat .n{font-family:var(--mono);font-weight:700;font-size:1.4rem}
+  .rstat .l{font-family:var(--mono);font-size:.68rem;color:var(--dim);text-transform:uppercase;letter-spacing:.04em;margin-top:4px}
+  .rstat.know .n{color:var(--know)} .rstat.dontknow .n{color:var(--dontknow)}
+
+  .topic-breakdown{text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:20px 22px;margin-bottom:28px}
+  .topic-breakdown h3{font-family:var(--disp);font-size:.98rem;font-weight:600;margin:0 0 14px}
+  .tb-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:.84rem}
+  .tb-row:last-child{margin-bottom:0}
+  .tb-row .tb-name{font-family:var(--mono);width:150px;flex-shrink:0;color:var(--dim);font-size:.78rem}
+  .tb-row .tb-bar{flex:1;height:8px;background:var(--panel2);border-radius:99px;overflow:hidden}
+  .tb-row .tb-fill{height:100%;background:var(--know);border-radius:99px}
+  .tb-row .tb-frac{font-family:var(--mono);font-size:.76rem;color:var(--dim);width:46px;text-align:right;flex-shrink:0}
+
+  .result-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+  footer{border-top:1px solid var(--line);padding:30px 0 50px;text-align:center;color:var(--dim2);font-size:.82rem;font-family:var(--mono)}
+
+  @media(max-width:600px){
+    .hero{padding:56px 0 36px}
+    .flashcard{padding:22px 18px}
+    .grade-row{flex-direction:column}
+  }
+
+  body{font-feature-settings:'calt' 0,'liga' 0}
+  :root{--r:#f2a93b;--c:#4a9fe0;--l:#5fb86a;--src:#e07c4a;--kir:#e05fc8;--ac:#2dd4bf}
+  .subblock{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:10px 0}
+  .subblock .sb-title{font-family:var(--mono);font-size:.74rem;font-weight:700;color:var(--quiz);margin:0 0 6px;text-transform:uppercase;letter-spacing:.04em}
+  .subblock p{margin:0 0 6px}
+  .fc-answer .formula,.eq-answer .formula{text-align:left!important;font-size:.86rem!important;line-height:1.85;overflow-x:auto;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0;font-family:var(--mono);color:var(--text)}
+  .formula .dim{color:var(--dim)}
+  .eq-answer h5{font-family:var(--disp);font-weight:600;color:var(--know);margin:0 0 12px;font-size:1rem}
+  .eq-answer p,.eq-answer li{font-size:.94rem;color:var(--dim)}
+  .eq-answer .note{font-size:.86rem;color:var(--dim2);border-left:3px solid var(--line2);padding:2px 0 2px 12px;margin-top:10px}
+  .fc-body ul,.fc-answer ul,.eq-answer ul{padding-left:20px}
+  .plot{width:100%;max-width:520px;display:block;margin:8px auto;height:auto}
+  .plot .pg{stroke:#26343e;stroke-width:1} .plot .pg.pm{stroke:#3a4a55}
+  .plot .pt{font-family:var(--mono);font-size:10.5px;fill:var(--dim)}
+  .plot .pl{fill:none;stroke:var(--text);stroke-width:2.2}
+
+  .fc-answer table.tm.tl th,.fc-answer table.tm.tl td,.eq-answer table.tm.tl td{text-align:left}
+  .fc-answer table.tm.tl td:first-child{color:var(--text);font-weight:600;white-space:nowrap}
+  .srcb{display:inline-block;font-family:var(--mono);font-size:.7rem;font-weight:700;color:#e07c4a;border:1px solid rgba(224,124,74,.5);background:rgba(224,124,74,.08);border-radius:999px;padding:2px 9px;margin:0 0 8px}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Sieci światłowodowe · tryb testowy</p>
+    <h1>Baza z kolosów - <span class="acc">sprawdź się</span> naprawdę</h1>
+    <p class="lede">Pytania z kolokwiów dr. Stępczaka 2021-2025 (przeglądy prób i bazy roczników), które pasują do przerobionych wykładów, plus własne pytania z tych samych slajdów. Przy każdym: odpowiedź z klucza, skąd pochodzi i jak to zapamiętać. Pula rośnie z każdym wykładem.</p>
+    <div class="hero-stats" id="heroStats"></div>
+  </div>
+</div>
+
+<main>
+  <div class="wrap">
+
+    <!-- ========== SETUP ========== -->
+    <div id="setupScreen">
+      <p style="color:var(--dim);font-size:.92rem;margin:0 0 6px">Wybierz tematy do przetestowania (albo zostaw wszystkie zaznaczone):</p>
+      <div class="topic-grid" id="topicGrid"></div>
+      <div class="setup-actions">
+        <button class="btn" id="startBtn">▶ Zacznij test</button>
+        <button class="btn sec" id="selectAllBtn">zaznacz wszystkie</button>
+        <button class="btn sec" id="selectNoneBtn">odznacz wszystkie</button>
+        <span class="selcount" id="selCount"></span>
+      </div>
+
+      <div class="exam-gen-box">
+        <h3>📝 Albo wygeneruj losowy zestaw</h3>
+        <p>Zestawy rosną razem z notatką. Pełna symulacja kolosu 1 będzie, jak dojdzie kilka wykładów.</p>
+        <div class="exam-tpl-grid" id="examTplGrid"></div>
+      </div>
+    </div>
+
+    <!-- ========== QUIZ ========== -->
+    <div id="quizScreen">
+      <div class="exam-banner" id="examBanner" style="display:none">
+        <span class="eb-name" id="ebName">Egzamin</span>
+      </div>
+      <div class="quiz-top">
+        <div class="progress-text" id="progressText">fiszka 1/119</div>
+        <div class="live-score">
+          <span class="k" id="liveKnow">✓ 0</span>
+          <span class="d" id="liveDontknow">✗ 0</span>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+      <div class="flashcard">
+        <div class="fc-tag" id="fcTag">TAG</div>
+        <h3 class="fc-title" id="fcTitle">Pytanie…</h3>
+        <div class="fc-body" id="fcBody"></div>
+
+        <div class="reveal-wrap" id="revealWrap">
+          <button class="reveal-btn-big" id="revealBtn">▸ Pokaż rozwiązanie</button>
+        </div>
+
+        <div class="fc-answer" id="fcAnswerWrap">
+          <hr class="fc-divider">
+          <div id="fcAnswer"></div>
+          <div class="grade-row">
+            <button class="grade-btn dontknow" id="gradeNo">✗ Nie wiedziałem</button>
+            <button class="grade-btn know" id="gradeYes">✓ Wiedziałem</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="quiz-foot">
+        <button class="btn sec" id="quitBtn"><- Przerwij test</button>
+        <button class="btn sec" id="backCardBtn" style="display:none">↩ Cofnij ocenę</button>
+      </div>
+    </div>
+
+    <!-- ========== EXAM PAPER (wszystkie pytania naraz) ========== -->
+    <div id="examPaperScreen">
+      <div class="exam-paper-head" id="examPaperHead">
+        <div>
+          <div class="ep-name" id="epName">Egzamin</div>
+          <div class="ep-progress" id="epProgress">0 / 0 ocenione</div>
+        </div>
+        <div class="ep-actions">
+          <button class="btn sec" id="epQuitBtn"><- Przerwij</button>
+          <button class="btn" id="epFinishBtn">Zakończ i zobacz wynik</button>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="epProgressFill" style="width:0%"></div></div>
+      <div id="examQuestionsList"></div>
+    </div>
+
+    <!-- ========== RESULTS ========== -->
+    <div id="resultsScreen">
+      <div class="result-ring">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          <circle cx="80" cy="80" r="70" fill="none" stroke="#1a232b" stroke-width="14"/>
+          <circle id="ringFill" cx="80" cy="80" r="70" fill="none" stroke="#3ec9c2" stroke-width="14"
+            stroke-dasharray="440" stroke-dashoffset="440" stroke-linecap="round"/>
+        </svg>
+        <div class="pct" id="resultPct">0%</div>
+      </div>
+      <h2 class="result-headline" id="resultHeadline">Wynik</h2>
+      <p class="result-sub" id="resultSub">-</p>
+
+      <div class="result-stats">
+        <div class="rstat know"><div class="n" id="rsKnow">0</div><div class="l">wiedziałem</div></div>
+        <div class="rstat dontknow"><div class="n" id="rsDontknow">0</div><div class="l">nie wiedziałem</div></div>
+        <div class="rstat"><div class="n" id="rsTotal">0</div><div class="l">razem</div></div>
+      </div>
+
+      <div class="topic-breakdown" id="topicBreakdown">
+        <h3>Wynik wg tematu</h3>
+        <div id="tbRows"></div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn" id="retryMissedBtn">↻ Powtórz tylko błędy</button>
+        <button class="btn sec" id="retryAllBtn">↺ Zacznij od nowa</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <p>Fiszki z sieci światłowodowych · odpowiedzi z kluczy kolosów 2021-2025</p>
+</footer>
+
+<script>
+function fillCkts(){}
+
+const T1='Architektura sieci', T2='Tryby i cechy sieci', T3='Sieć dostępowa FTTH';
+const NT='swiatlowody-notatka.html';
+const jump=(href,txt)=>`<a class="jump" href="${href}" target="_blank" style="display:inline-block;margin-top:8px;font-size:.76rem">-> ${txt}</a>`;
+const src=t=>`<p class="srcb">${t}</p>`;
+const NETTAB=`<table class="tm tl"><tr><th></th><th>Szkieletowa</th><th>Metropolitalna</th><th>Dostępowa</th></tr>
+<tr><td>Struktura</td><td>kratowa (mesh)</td><td>pierścieniowa</td><td>pierścień + gwiazda</td></tr>
+<tr><td>Rozległość</td><td>~100 - 1000 km</td><td>~20 - 100 km</td><td>&lt; 20 km</td></tr>
+<tr><td>Węzły</td><td>przełączniki OXC</td><td>ADM i OXC</td><td>pasywne lub aktywne selektory</td></tr>
+<tr><td>Technika</td><td>DWDM ~80 kanałów</td><td>CWDM ~16 kanałów</td><td>xPON, Ethernet</td></tr>
+<tr><td>Przepływność</td><td>10 - 40 Gb/s</td><td>2,5 - 10 Gb/s</td><td>&lt; 2,5 Gb/s</td></tr></table>`;
+
+const CARDS = [
+/* ================= T1 ARCHITEKTURA ================= */
+{id:'a1',tag:'DOPASUJ · Z KOLOSA',topic:T1,
+ title:'Dopasuj parametry do poszczególnych typów sieci: szkieletowej, metropolitalnej i dostępowej.',
+ body:`${src('kolos 1 2021 (15 pkt) · kolos 2 2024 (15 pkt) · kolos 2 2025 (5 pkt)')}<p>Dla każdej sieci: struktura, rozległość, węzły, technika transmisyjna, przepływność. Do wyboru:</p><p style="font-family:var(--mono);font-size:.82rem">kratowa · pierścieniowa · pierścień + gwiazda · ~100-1000 km · ~20-100 km · &lt;20 km · OXC · ADM i OXC · pasywne lub aktywne selektory · DWDM ~80 ch · CWDM ~16 ch · xPON, Ethernet · 10-40 Gbps · 2,5-10 Gbps · &lt;2,5 Gbps</p>`,
+ answer:`<h5>Odpowiedź</h5>${NETTAB}<p class="note">Reguła: im bliżej abonenta, tym mniejszy zasięg, mniej kanałów i mniejsza przepływność. Topologia: krata -> pierścień -> pierścień + gwiazda. Wystarczy pamiętać kolejność, resztę układasz sam.</p>${jump(NT+'#poziomy','3 poziomy sieci')}`},
+{id:'a2',tag:'KTÓRA SIEĆ?',topic:T1,
+ title:'Struktura pierścieniowa, rozległość ~20-100 km, technika CWDM ~16 kanałów. Jaka to sieć?',
+ body:`<p>Dodatkowo: jaką ma przepływność i jakie węzły?</p>`,
+ answer:`<h5>Odpowiedź: sieć metropolitalna (MAN)</h5><p>Przepływność <strong>2,5 - 10 Gb/s</strong>, węzły z multiplekserami <strong>ADM</strong> (add-drop) i przełącznicami <strong>OXC</strong>. Łączy sieci lokalne w obrębie aglomeracji.</p><p class="note">CWDM = rzadkie WDM, mało kanałów. To "środek" między DWDM w szkielecie a xPON u abonenta.</p>${jump(NT+'#poziomy','tabela sieci')}`},
+{id:'a3',tag:'KTÓRA SIEĆ?',topic:T1,
+ title:'Która sieć używa DWDM ~80 kanałów i ma przepływność 10-40 Gb/s?',
+ body:`<p>Podaj też jej strukturę, rozległość i typ węzłów.</p>`,
+ answer:`<h5>Odpowiedź: sieć szkieletowa (Core Network, Long-Haul)</h5><p>Struktura <strong>kratowa (mesh)</strong>, rozległość <strong>~100 - 1000 km</strong>, węzły z przełącznicami <strong>OXC</strong> (cross-connect). Połączenia międzynarodowe i międzymiastowe, łączy sieci metropolitalne.</p><p class="note">Najwięcej ruchu = najwięcej kanałów (DWDM, "gęste") i największa przepływność.</p>${jump(NT+'#poziomy','tabela sieci')}`},
+{id:'a4',tag:'SIEĆ DOSTĘPOWA',topic:T1,
+ title:'Opisz sieć dostępową: struktura, rozległość, węzły, technika transmisyjna, przepływność.',
+ body:`<p>Tak jak w pytaniu z kolosa, wartościami z rysunku na slajdzie.</p>`,
+ answer:`<h5>Odpowiedź</h5><p>Struktura <strong>pierścień + gwiazda</strong>, rozległość <strong>&lt; 20 km</strong>, węzły z <strong>pasywnymi lub aktywnymi selektorami</strong> (rozgałęźnikami), technika <strong>xPON, Ethernet</strong> (na rysunku też xDSL), przepływność <strong>&lt; 2,5 Gb/s</strong>.</p><p class="note">Nazwa z slajdu: Local Access Network (LAN), lokalna sieć dostępowa.</p>${jump(NT+'#poziomy','tabela sieci')}`},
+{id:'a5',tag:'WĘZŁY',topic:T1,
+ title:'Jakie urządzenia stoją w węzłach sieci szkieletowej, metropolitalnej i dostępowej?',
+ body:`<p>Rozwiń też skróty.</p>`,
+ answer:`<h5>Odpowiedź</h5><table class="tm tl"><tr><th>Sieć</th><th>Węzły</th></tr><tr><td>szkieletowa</td><td><b>OXC</b> (XC), optical cross-connect, przełącznica optyczna</td></tr><tr><td>metropolitalna</td><td><b>ADM</b> (add-drop multiplexer, krotnica transferowa) <b>oraz OXC</b></td></tr><tr><td>dostępowa</td><td>węzły rozgałęźne <b>pasywne lub aktywne</b> (selektory, rozgałęźniki)</td></tr></table><p class="note">ADM wyjmuje i dokłada wybrane kanały do pierścienia, dlatego siedzi w metro. OXC przełącza całe ścieżki między wieloma kierunkami, czyli tam, gdzie jest krata.</p>`},
+{id:'a6',tag:'PUŁAPKA',topic:T1,
+ title:'Slajd 17 mówi, że sieć szkieletowa ma łącza "kilkaset ÷ kilka tysięcy km". Co zaznaczasz na kolosie?',
+ body:`<p>Do wyboru w pytaniu: ~100 - 1000 km, ~20 - 100 km, &lt; 20 km.</p>`,
+ answer:`<h5>Odpowiedź: ~100 - 1000 km</h5><p>Kolos bierze wartości z <strong>rysunku na slajdzie 18</strong>, nie z tekstu slajdu 17. Tak samo dostępowa: w tekście "magistrala, pierścień lub gwiazda", na kolosie <strong>pierścień + gwiazda</strong>.</p><p class="note">Ogólnie: przy tym prowadzącym ucz się wartości z rysunków i tabel, bo z nich robi pytania.</p>`},
+{id:'a7',tag:'KOLEJNOŚĆ',topic:T1,
+ title:'Uszereguj sieci od największej do najmniejszej przepływności i podaj liczby.',
+ body:`<p>Sieć szkieletowa, dostępowa, metropolitalna.</p>`,
+ answer:`<h5>Odpowiedź</h5><p><strong>szkieletowa 10-40 Gb/s</strong> > <strong>metropolitalna 2,5-10 Gb/s</strong> > <strong>dostępowa &lt; 2,5 Gb/s</strong></p><p class="note">Granice się zazębiają: 10 Gb/s to góra metro i dół szkieletu, 2,5 Gb/s to góra dostępowej i dół metro.</p>`},
+{id:'a8',tag:'SKRÓTY',topic:T1,
+ title:'Rozwiń: CN, MAN, LAN (wg slajdów), OXC, ADM, DWDM, CWDM, xPON.',
+ body:`<p>Same rozwinięcia i jedno zdanie, co to.</p>`,
+ answer:`<h5>Odpowiedź</h5><table class="tm tl"><tr><td>CN</td><td>Core Network, sieć szkieletowa (Long-Haul Network)</td></tr><tr><td>MAN</td><td>Metropolitan Access Network, sieć metropolitalna</td></tr><tr><td>LAN</td><td>Local Access Network, lokalna sieć dostępowa (uwaga: nie "Local Area")</td></tr><tr><td>OXC</td><td>Optical Cross-Connect, przełącznica optyczna</td></tr><tr><td>ADM / OADM</td><td>(Optical) Add-Drop Multiplexer, krotnica transferowa</td></tr><tr><td>DWDM</td><td>Dense WDM, gęste zwielokrotnienie falowe (~80 kanałów)</td></tr><tr><td>CWDM</td><td>Coarse WDM, rzadkie zwielokrotnienie falowe (~16 kanałów)</td></tr><tr><td>xPON</td><td>Passive Optical Network w różnych odmianach (GPON, EPON...)</td></tr></table>`},
+
+/* ================= T2 TRYBY I CECHY ================= */
+{id:'t1',tag:'DOPASUJ · Z KOLOSA',topic:T2,
+ title:'Dobierz właściwe cechy do odpowiednich terminów.',
+ body:`${src('kolos 1 2021 (10 pkt) · kolos 1 2022 (10 pkt)')}<p>Terminy: sieć w trybie komutacji obwodów, skalowalność sieci, sieć w trybie obwodu wirtualnego, połączeniowy tryb pracy, modułowość sieci, sieć w trybie komutacji pakietów, topologia sieci, bezpołączeniowy tryb pracy.</p><p style="font-family:var(--mono);font-size:.8rem">Cechy: konfiguruje połączenie end to end przed transmisją · dostosowywanie liczby węzłów i systemów użytkowników · generuje połączenia o wzorce ruchu z wyprzedzeniem · przesyłanie informacji dwukierunkowo · dodawanie lub redukowanie węzłów bez konfliktów wykorzystania ścieżek · elastycznie przydziela szerokość pasma · typu Mesh · przesyłanie informacji jednokierunkowo</p>`,
+ answer:`<h5>Odpowiedź (klucz z zaliczonych podejść)</h5><table class="tm tl">
+<tr><td>komutacja obwodów</td><td>konfiguruje połączenie end to end przed transmisją</td></tr>
+<tr><td>obwód wirtualny</td><td>generuje połączenia o wzorce ruchu z wyprzedzeniem</td></tr>
+<tr><td>komutacja pakietów</td><td>elastycznie przydziela szerokość pasma</td></tr>
+<tr><td>połączeniowy tryb</td><td>przesyłanie informacji dwukierunkowo</td></tr>
+<tr><td>bezpołączeniowy tryb</td><td>przesyłanie informacji jednokierunkowo</td></tr>
+<tr><td>skalowalność</td><td>dostosowywanie liczby węzłów i systemów użytkowników</td></tr>
+<tr><td>modułowość</td><td>dodawanie lub redukowanie węzłów bez konfliktów wykorzystania ścieżek</td></tr>
+<tr><td>topologia</td><td>typu Mesh</td></tr></table><p class="note">Najłatwiej pomylić skalowalność z modułowością: skalowalność = <b>ile</b> (liczba węzłów i użytkowników), modułowość = <b>dokładanie i zabieranie</b> bez kolizji ścieżek.</p>${jump(NT+'#tryby','tryby i cechy sieci')}`},
+{id:'t2',tag:'KOMUTACJA',topic:T2,
+ title:'Czym różni się komutacja obwodów od komutacji pakietów?',
+ body:`<p>Na slajdach: "zestawienie bezpośredniego połączenia" i "przesyłanie pakietów informacji".</p>`,
+ answer:`<h5>Odpowiedź</h5><p><strong>Komutacja obwodów:</strong> sieć najpierw zestawia stałą ścieżkę end to end między abonentami, dopiero potem idzie transmisja. Ścieżka jest zajęta przez cały czas połączenia, nawet gdy nic nie leci.</p><p><strong>Komutacja pakietów:</strong> dane dzielone na pakiety, każdy węzeł przekazuje je dalej, łącza są współdzielone. Pasmo przydzielane <strong>elastycznie</strong>, tylko gdy są dane.</p><p class="note">Na kolosie te dwie definicje padają jako "konfiguruje połączenie end to end przed transmisją" i "elastycznie przydziela szerokość pasma".</p>${jump(NT+'#transmisja','metody transmisji')}`},
+{id:'t3',tag:'SKALOWALNOŚĆ',topic:T2,
+ title:'Skalowalność sieci a modułowość sieci. Która definicja jest która?',
+ body:`<p>A: "dodawanie lub redukowanie węzłów sieciowych bez konfliktów wykorzystania ścieżek"<br>B: "dostosowywanie liczby węzłów i systemów użytkowników"</p>`,
+ answer:`<h5>Odpowiedź: skalowalność = B, modułowość = A</h5><p>Skalowalność mówi o <strong>skali</strong>: ile węzłów i użytkowników sieć udźwignie. Modułowość mówi o <strong>modułach</strong>: można je dokładać i wyjmować bez psucia ścieżek, które już działają.</p>`},
+{id:'t4',tag:'TRYB PRACY',topic:T2,
+ title:'Co umożliwia połączeniowy, a co bezpołączeniowy tryb pracy sieci (wg klucza z kolosa)?',
+ body:`<p>Jedno słowo różnicy.</p>`,
+ answer:`<h5>Odpowiedź</h5><p>Połączeniowy: przesyłanie informacji <strong>dwukierunkowo</strong>.<br>Bezpołączeniowy: przesyłanie informacji <strong>jednokierunkowo</strong>.</p><p class="note">Skojarzenie: jest połączenie, to obie strony rozmawiają. Bez połączenia wysyłasz i nie czekasz na drugą stronę.</p>`},
+{id:'t5',tag:'OBWÓD WIRTUALNY',topic:T2,
+ title:'Jaką cechę przypisuje klucz kolosa sieci w trybie obwodu wirtualnego?',
+ body:`<p>Pozostałe dwie opcje to komutacja obwodów i komutacja pakietów.</p>`,
+ answer:`<h5>Odpowiedź: generuje połączenia o wzorce ruchu z wyprzedzeniem</h5><p>Obwód wirtualny jest pośrodku: ścieżka jest ustalana wcześniej (jak w komutacji obwodów), ale na podstawie przewidywanego ruchu, a łącza dalej są współdzielone (jak przy pakietach).</p>`},
+
+/* ================= T3 FTTH ================= */
+{id:'f1',tag:'KOLEJNOŚĆ',topic:T3,
+ title:'Uszereguj odcinki sieci FTTH od operatora do abonenta.',
+ body:`<p>Odcinek dystrybucyjny, ONT, odcinek transportowy, OLT, odcinek rozdzielczy, sieć wewnątrzbudynkowa.</p>`,
+ answer:`<h5>Odpowiedź</h5><p><strong>OLT</strong> (obiekt centralny) -> odcinek <strong>transportowy</strong> -> odcinek <strong>dystrybucyjny</strong> -> odcinek <strong>rozdzielczy</strong> -> sieć <strong>wewnątrzbudynkowa</strong> zakończona w <strong>ONT</strong></p><p class="note">Zapamiętaj "T-D-R": transport, dystrybucja, rozdział. Każdy kolejny odcinek jest bliżej abonenta i bardziej rozgałęziony.</p>${jump(NT+'#ftth','odcinki FTTH')}`},
+{id:'f2',tag:'OLT / ONT',topic:T3,
+ title:'Co to jest OLT, a co ONT i gdzie stoją?',
+ body:`<p>I do którego poziomu sieci należy FTTH?</p>`,
+ answer:`<h5>Odpowiedź</h5><p><strong>OLT</strong> (Optical Line Terminal): terminal po stronie operatora, w obiekcie centralnym. <strong>ONT</strong> (Optical Network Terminal): terminal u abonenta, kończy sieć wewnątrzbudynkową.</p><p>FTTH (Fiber To The Home) to część <strong>sieci dostępowej</strong>: światłowód aż do mieszkania.</p>`},
+];
+
+
+
+
+</script>
+<script>
+  // ===== stan aplikacji =====
+  let deck = [];          // aktualna talia (po filtrze + przetasowaniu)
+  let idx = 0;
+  let knowCount = 0, dontknowCount = 0;
+  let missedCards = [];   // karty ocenione jako "nie wiedziałem" w tym przejściu
+  let perCardResult = {}; // id -> 'know'|'dontknow', dla rozbicia tematycznego
+  let selectedTopics = new Set();
+  let topicsOrder = [];
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+
+  function buildTopics(){
+    const counts = {};
+    CARDS.forEach(c=>{ counts[c.topic] = (counts[c.topic]||0)+1; });
+    topicsOrder = Object.keys(counts).sort((a,b)=>counts[b]-counts[a]);
+    selectedTopics = new Set(topicsOrder);
+
+    const grid = document.getElementById('topicGrid');
+    grid.innerHTML = '';
+    topicsOrder.forEach(t=>{
+      const div = document.createElement('div');
+      div.className = 'topic-card checked';
+      div.innerHTML = `<div class="topic-row-inner"><span class="check">✓</span><span class="tname">${t}</span></div><span class="tcount">${counts[t]}</span>`;
+      div.addEventListener('click', ()=>{
+        if(selectedTopics.has(t)){ selectedTopics.delete(t); div.classList.remove('checked'); }
+        else { selectedTopics.add(t); div.classList.add('checked'); }
+        updateSelCount();
+      });
+      grid.appendChild(div);
+    });
+
+    document.getElementById('heroStats').innerHTML =
+      `<span>${CARDS.length} pytań</span><span>${topicsOrder.length} tematów</span><span>losowa kolejność</span><span>self-test</span>`;
+    updateSelCount();
+  }
+
+  function updateSelCount(){
+    const n = CARDS.filter(c=>selectedTopics.has(c.topic)).length;
+    document.getElementById('selCount').textContent = `wybrano: ${n} pytań`;
+    document.getElementById('startBtn').disabled = n===0;
+  }
+
+  document.getElementById('selectAllBtn').addEventListener('click', ()=>{
+    selectedTopics = new Set(topicsOrder);
+    document.querySelectorAll('.topic-card').forEach(d=>d.classList.add('checked'));
+    updateSelCount();
+  });
+  document.getElementById('selectNoneBtn').addEventListener('click', ()=>{
+    selectedTopics.clear();
+    document.querySelectorAll('.topic-card').forEach(d=>d.classList.remove('checked'));
+    updateSelCount();
+  });
+
+  document.getElementById('startBtn').addEventListener('click', ()=>{
+    const pool = CARDS.filter(c=>selectedTopics.has(c.topic));
+    startQuiz(pool);
+  });
+
+  let currentExamName = null;
+
+  function startQuiz(pool, examName){
+    deck = shuffle(pool);
+    idx = 0; knowCount = 0; dontknowCount = 0; missedCards = []; perCardResult = {};
+    currentExamName = examName || null;
+    document.getElementById('setupScreen').style.display = 'none';
+    document.getElementById('resultsScreen').style.display = 'none';
+    document.getElementById('examPaperScreen').style.display = 'none';
+    document.getElementById('quizScreen').style.display = 'block';
+    const banner = document.getElementById('examBanner');
+    if(currentExamName){
+      banner.style.display = 'flex';
+      document.getElementById('ebName').textContent = '📝 ' + currentExamName;
+    } else {
+      banner.style.display = 'none';
+    }
+    renderCard();
+  }
+
+  // ===================== GENERATOR EGZAMINU =====================
+  // Schemat oparty na proporcjach z nadesłanych prawdziwych egzaminów
+  // (komisyjny 11p., poprawkowy 5p., 20.06.2023 9p., egzamin z punktacją 10p.)
+  const EXAM_TEMPLATES = {
+    w1: {
+      label: 'Wykład 1', meta: '5 pytań',
+      desc: 'Trzy poziomy sieci, tryby pracy sieci i FTTH. Na start, zanim dojdą kolejne wykłady.',
+      counts: {'Architektura sieci':3, 'Tryby i cechy sieci':1, 'Sieć dostępowa FTTH':1}
+    },
+    kol: {
+      label: 'Pytania z kolosów', meta: '2 duże pytania z bazy',
+      desc: 'Tylko te, które były na kolosach słowo w słowo: tabela sieci i dobieranie cech do terminów.',
+      counts: {'Architektura sieci':1, 'Tryby i cechy sieci':1}
+    }
+  };
+
+  function buildExamTemplates(){
+    const grid = document.getElementById('examTplGrid');
+    grid.innerHTML = '';
+    Object.entries(EXAM_TEMPLATES).forEach(([key,t])=>{
+      const div = document.createElement('div');
+      div.className = 'exam-tpl';
+      div.innerHTML = `<div class="et-name">${t.label}</div><div class="et-meta">${t.meta}</div><div class="et-desc">${t.desc}</div>`;
+      div.addEventListener('click', ()=>generateExam(key));
+      grid.appendChild(div);
+    });
+  }
+
+  function generateExam(templateKey){
+    const tpl = EXAM_TEMPLATES[templateKey];
+    let examDeck = [];
+    const used = new Set();
+    Object.entries(tpl.counts).forEach(([topic,n])=>{
+      const poolForTopic = shuffle(CARDS.filter(c=>c.topic===topic && !used.has(c.id)));
+      const picked = poolForTopic.slice(0, n);
+      picked.forEach(c=>used.add(c.id));
+      examDeck = examDeck.concat(picked);
+    });
+    const target = Object.values(tpl.counts).reduce((a,b)=>a+b,0);
+    if(examDeck.length < target){
+      const filler = shuffle(CARDS.filter(c=>!used.has(c.id)));
+      examDeck = examDeck.concat(filler.slice(0, target-examDeck.length));
+    }
+    examDeck = shuffle(examDeck);
+    renderExamPaper(examDeck, `Egzamin: ${tpl.label} (${examDeck.length} pytań)`);
+  }
+
+  buildExamTemplates();
+
+  // ===================== ARKUSZ EGZAMINU (wszystkie pytania naraz) =====================
+  function renderExamPaper(examDeck, examName){
+    deck = examDeck;
+    knowCount = 0; dontknowCount = 0; missedCards = []; perCardResult = {};
+    currentExamName = examName;
+
+    document.getElementById('setupScreen').style.display = 'none';
+    document.getElementById('quizScreen').style.display = 'none';
+    document.getElementById('resultsScreen').style.display = 'none';
+    document.getElementById('examPaperScreen').style.display = 'block';
+
+    document.getElementById('epName').textContent = '📝 ' + examName;
+
+    const list = document.getElementById('examQuestionsList');
+    list.innerHTML = '';
+    deck.forEach((c,i)=>{
+      const div = document.createElement('div');
+      div.className = 'exam-q';
+      div.id = 'eq-' + c.id;
+      div.innerHTML = `
+        <div class="eq-num">Pytanie ${i+1} / ${deck.length}</div>
+        <div class="fc-tag">${c.tag}</div>
+        <h3 class="fc-title">${c.title}</h3>
+        <div class="fc-body">${c.body}</div>
+        <div class="eq-reveal-wrap">
+          <button class="reveal-btn-big" onclick="epReveal('${c.id}', this)">▸ Pokaż rozwiązanie</button>
+        </div>
+        <div class="eq-answer" id="eq-answer-${c.id}">
+          <div>${c.answer}</div>
+          <div class="eq-grade-row">
+            <button class="grade-btn dontknow" onclick="epGrade('${c.id}','dontknow')" id="eq-no-${c.id}">✗ Nie wiedziałem</button>
+            <button class="grade-btn know" onclick="epGrade('${c.id}','know')" id="eq-yes-${c.id}">✓ Wiedziałem</button>
+          </div>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+    updateExamProgress();
+    highlightCode();
+    window.scrollTo({top:0, behavior:'instant'});
+  }
+
+  function epReveal(cardId, btn){
+    const ans = document.getElementById('eq-answer-'+cardId);
+    ans.classList.add('show');
+    btn.style.display = 'none';
+    highlightCode();
+  }
+
+  function epGrade(cardId, result){
+    const wasGraded = perCardResult.hasOwnProperty(cardId);
+    if(wasGraded){
+      // cofnij poprzednia ocene z licznikow
+      if(perCardResult[cardId]==='know') knowCount--;
+      else { dontknowCount--; missedCards = missedCards.filter(c=>c.id!==cardId); }
+    }
+    perCardResult[cardId] = result;
+    if(result==='know') knowCount++;
+    else { dontknowCount++; const c = deck.find(d=>d.id===cardId); if(c) missedCards.push(c); }
+
+    const yesBtn = document.getElementById('eq-yes-'+cardId);
+    const noBtn = document.getElementById('eq-no-'+cardId);
+    yesBtn.classList.toggle('active-know', result==='know');
+    noBtn.classList.toggle('active-dontknow', result==='dontknow');
+    document.getElementById('eq-'+cardId).classList.add('graded');
+
+    updateExamProgress();
+  }
+
+  function updateExamProgress(){
+    const graded = Object.keys(perCardResult).length;
+    const total = deck.length;
+    document.getElementById('epProgress').textContent = `${graded} / ${total} ocenione`;
+    document.getElementById('epProgressFill').style.width = (total ? graded/total*100 : 0) + '%';
+  }
+
+  document.getElementById('epFinishBtn').addEventListener('click', ()=>{
+    const graded = Object.keys(perCardResult).length;
+    if(graded < deck.length){
+      
+      deck.forEach(c=>{
+        if(!perCardResult.hasOwnProperty(c.id)){
+          perCardResult[c.id] = 'dontknow';
+          dontknowCount++;
+          missedCards.push(c);
+        }
+      });
+    }
+    document.getElementById('examPaperScreen').style.display = 'none';
+    showResults();
+  });
+
+  document.getElementById('epQuitBtn').addEventListener('click', ()=>{
+    {
+      currentExamName = null;
+      document.getElementById('examPaperScreen').style.display = 'none';
+      document.getElementById('setupScreen').style.display = 'block';
+    }
+  });
+
+  function renderCard(){
+    const c = deck[idx];
+    document.getElementById('fcTag').textContent = c.tag;
+    document.getElementById('fcTitle').innerHTML = c.title;
+    document.getElementById('fcBody').innerHTML = c.body;
+    document.getElementById('fcAnswer').innerHTML = c.answer;
+    document.getElementById('fcAnswerWrap').classList.remove('show');
+    document.getElementById('revealWrap').style.display = 'block';
+    document.getElementById('progressText').textContent = `fiszka ${idx+1}/${deck.length}`;
+    document.getElementById('progressFill').style.width = (idx/deck.length*100) + '%';
+    document.getElementById('liveKnow').textContent = '✓ ' + knowCount;
+    document.getElementById('liveDontknow').textContent = '✗ ' + dontknowCount;
+    document.getElementById('backCardBtn').style.display = (idx > 0) ? 'inline-flex' : 'none';
+    highlightCode();
+    window.scrollTo({top:0, behavior:'instant'});
+  }
+
+  document.getElementById('revealBtn').addEventListener('click', ()=>{
+    document.getElementById('fcAnswerWrap').classList.add('show');
+    document.getElementById('revealWrap').style.display = 'none';
+    highlightCode();
+  });
+
+  function grade(result){
+    const c = deck[idx];
+    perCardResult[c.id] = result;
+    if(result==='know') knowCount++; else { dontknowCount++; missedCards.push(c); }
+    idx++;
+    if(idx>=deck.length){ showResults(); }
+    else { renderCard(); }
+  }
+  document.getElementById('gradeYes').addEventListener('click', ()=>grade('know'));
+  document.getElementById('gradeNo').addEventListener('click', ()=>grade('dontknow'));
+
+  document.getElementById('backCardBtn').addEventListener('click', ()=>{
+    if(idx <= 0) return;
+    idx--;
+    const c = deck[idx];
+    const prev = perCardResult[c.id];
+    if(prev === 'know'){ knowCount--; }
+    else if(prev === 'dontknow'){ dontknowCount--; missedCards = missedCards.filter(m=>m.id!==c.id); }
+    delete perCardResult[c.id];
+    renderCard();
+  });
+
+  document.getElementById('quitBtn').addEventListener('click', ()=>{
+    {
+      currentExamName = null;
+      document.getElementById('quizScreen').style.display = 'none';
+      document.getElementById('examPaperScreen').style.display = 'none';
+      document.getElementById('setupScreen').style.display = 'block';
+    }
+  });
+
+  function showResults(){
+    document.getElementById('quizScreen').style.display = 'none';
+    document.getElementById('examPaperScreen').style.display = 'none';
+    document.getElementById('resultsScreen').style.display = 'block';
+    const total = knowCount + dontknowCount;
+    const pct = total ? Math.round(knowCount/total*100) : 0;
+
+    document.getElementById('rsKnow').textContent = knowCount;
+    document.getElementById('rsDontknow').textContent = dontknowCount;
+    document.getElementById('rsTotal').textContent = total;
+    document.getElementById('resultPct').textContent = pct + '%';
+
+    const circumference = 2*Math.PI*70;
+    const ring = document.getElementById('ringFill');
+    ring.setAttribute('stroke-dasharray', circumference);
+    const offset = circumference * (1 - pct/100);
+    ring.style.transition = 'stroke-dashoffset 1s ease';
+    setTimeout(()=>{ ring.setAttribute('stroke-dashoffset', offset); }, 50);
+    ring.setAttribute('stroke', pct>=80 ? '#5fb86a' : pct>=50 ? '#f2a93b' : '#e0584a');
+
+    let headline, sub;
+    if(currentExamName){
+      const passed = pct>=50;
+      headline = passed ? `Zaliczone - ${pct}% ✓` : `Niezaliczone - ${pct}%`;
+      sub = passed
+        ? `${currentExamName}. Próg zaliczenia to umownie 50% - przekroczony. Sprawdź rozbicie tematyczne poniżej, żeby dobić słabsze miejsca.`
+        : `${currentExamName}. Próg zaliczenia to umownie 50% - nie przekroczony tym razem. Zobacz rozbicie tematyczne, wróć do najsłabszych tematów i spróbuj ponownie.`;
+      ring.setAttribute('stroke', passed ? '#5fb86a' : '#e0584a');
+    }
+    else if(pct>=90){ headline='Solidnie 🔥'; sub='Tak trzymać - to wygląda na realną gotowość.'; }
+    else if(pct>=75){ headline='Dobrze'; sub='Większość siedzi. Dobij brakujące tematy poniżej.'; }
+    else if(pct>=50){ headline='W połowie drogi'; sub='Jest na czym budować - wróć do błędów i powtórz.'; }
+    else { headline='Jeszcze trochę pracy'; sub='To dobry moment, żeby wrócić do teorii w tych tematach.'; }
+    document.getElementById('resultHeadline').textContent = headline;
+    document.getElementById('resultSub').textContent = sub;
+
+    // rozbicie tematyczne
+    const byTopic = {};
+    deck.forEach(c=>{
+      if(!byTopic[c.topic]) byTopic[c.topic] = {know:0,total:0};
+      byTopic[c.topic].total++;
+      if(perCardResult[c.id]==='know') byTopic[c.topic].know++;
+    });
+    const tb = document.getElementById('tbRows');
+    tb.innerHTML = '';
+    Object.keys(byTopic).sort((a,b)=>(byTopic[a].know/byTopic[a].total)-(byTopic[b].know/byTopic[b].total)).forEach(t=>{
+      const {know,total} = byTopic[t];
+      const p = total ? (know/total*100) : 0;
+      const row = document.createElement('div');
+      row.className = 'tb-row';
+      row.innerHTML = `<span class="tb-name">${t}</span><div class="tb-bar"><div class="tb-fill" style="width:${p}%"></div></div><span class="tb-frac">${know}/${total}</span>`;
+      tb.appendChild(row);
+    });
+
+    document.getElementById('retryMissedBtn').disabled = missedCards.length===0;
+    document.getElementById('retryMissedBtn').textContent = missedCards.length
+      ? `↻ Powtórz tylko błędy (${missedCards.length})` : '↻ Brak błędów do powtórki';
+  }
+
+  document.getElementById('retryMissedBtn').addEventListener('click', ()=>{
+    if(missedCards.length) startQuiz(missedCards);
+  });
+  document.getElementById('retryAllBtn').addEventListener('click', ()=>{
+    currentExamName = null;
+    document.getElementById('resultsScreen').style.display = 'none';
+    document.getElementById('setupScreen').style.display = 'block';
+  });
+
+  // ===== syntax highlighter (taki sam jak w głównej notatce) =====
+  function highlightCode(){
+    fillCkts();
+    const KEYWORDS = ["int","double","float","char","bool","void","auto","string","unsigned","signed","short","long","size_t","const","static","if","else","for","while","do","switch","case","break","continue","default","return","goto","new","delete","this","virtual","friend","template","typename","class","struct","public","private","protected","enum","namespace","using","true","false","nullptr","sizeof","typedef","operator","explicit","mutable","inline","and","or","not"];
+    const re = new RegExp(
+      "(//[^\\n]*)" +
+      "|(\"(?:[^\"\\\\]|\\\\.)*\")" +
+      "|\\b(" + KEYWORDS.join("|") + ")\\b" +
+      "|\\b(\\d+\\.?\\d*)\\b",
+      "g"
+    );
+    document.querySelectorAll("pre.cpp code").forEach(block=>{
+      if(block.dataset.hl) return;
+      const raw = block.textContent;
+      const highlighted = raw.replace(re, function(m, cm, ds, kw, num){
+        if (cm) return '<span class="cm">'+cm+'</span>';
+        if (ds) return '<span class="st">'+ds+'</span>';
+        if (kw) return '<span class="kw">'+kw+'</span>';
+        if (num) return '<span class="nm">'+num+'</span>';
+        return m;
+      });
+      block.innerHTML = highlighted;
+      block.dataset.hl = '1';
+    });
+  }
+
+  // init
+  buildTopics();
+</script>
+</body>
+</html>

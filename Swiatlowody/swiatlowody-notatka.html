@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sieci światłowodowe - notatka</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0e12;--panel:#11171d;--panel2:#0d1217;--line:#1e2a32;--line2:#26343e;
+  --text:#e8eef1;--dim:#7c8d96;--dim2:#3d4f59;
+  --r:#f2a93b;--c:#4a9fe0;--l:#5fb86a;--src:#e07c4a;--kir:#e05fc8;--ac:#2dd4bf;--met:#a78bfa;--pow:#caa24a;
+  --disp:'Space Grotesk',system-ui,sans-serif;--body:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;font-feature-settings:'calt' 0,'liga' 0}
+.topnav{background:rgba(10,14,18,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:100}
+.topnav-inner{max-width:1100px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.topnav a{font-family:var(--mono);font-size:.68rem;font-weight:600;color:var(--dim);text-decoration:none;padding:5px 10px;border-radius:6px;border:1px solid var(--line2);white-space:nowrap}
+.topnav a:hover{color:var(--text);border-color:var(--text);background:var(--panel)}
+.topnav .spacer{flex:1}
+.topnav a.big{color:var(--text);border-color:var(--ac)}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:20px;padding-block:0 60px}
+h1{font-family:var(--disp);font-size:clamp(1.6rem,3.5vw,2.3rem);font-weight:700;letter-spacing:-.015em;padding:30px 0 8px;text-wrap:balance}
+h1 span{color:var(--dim2)}
+.lede{color:var(--dim);font-size:.92rem;padding-bottom:24px;border-bottom:1px solid var(--line);margin-bottom:28px;max-width:80ch}
+.lede strong{color:var(--text);font-weight:600}
+.lecture{font-family:var(--mono);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ac);margin:42px 0 6px;font-weight:700}
+.lecture-sub{color:var(--dim);font-size:.85rem;margin-bottom:22px}
+section{margin-bottom:34px;scroll-margin-top:64px}
+.sec-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.sec-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+h2{font-family:var(--disp);font-size:1.15rem;font-weight:600}
+a.dd{margin-left:auto;font-family:var(--mono);font-size:.68rem;color:var(--ac);text-decoration:none;border:1px solid var(--line2);padding:4px 9px;border-radius:6px}
+a.dd:hover{border-color:var(--ac)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;border-left:3px solid var(--line2);min-width:0}
+.card h3{font-family:var(--disp);font-size:.98rem;font-weight:600;margin-bottom:8px}
+.card p,.card li{font-size:.85rem;color:var(--dim)}
+.card p+p{margin-top:7px}
+.card strong,.card b{color:var(--text);font-weight:600}
+.card ul{padding-left:18px;display:grid;gap:4px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;margin-top:10px}
+table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.78rem;min-width:520px}
+th{text-align:left;padding:7px 10px;background:var(--panel2);color:var(--dim);font-weight:600;font-size:.65rem;text-transform:uppercase;letter-spacing:.04em}
+td{padding:7px 10px;border-top:1px solid var(--line);vertical-align:top}
+td b{color:var(--text)}
+.F{font-family:var(--mono);font-size:.86rem;background:var(--panel2);border:1px solid var(--line2);border-radius:8px;padding:9px 13px;margin:6px 0;color:var(--text);line-height:1.8;overflow-x:auto}
+.F .dim{color:var(--dim)}
+.steps{margin-top:6px}
+.step{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--line)}
+.step:last-child{border-bottom:none}
+.step .n{font-family:var(--mono);font-size:.7rem;font-weight:700;width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;background:rgba(224,95,200,.14);color:var(--kir)}
+.step p{font-size:.84rem;color:var(--dim)}
+.step p strong{color:var(--text);font-weight:600}
+code{font-family:var(--mono);font-size:.85em;background:var(--panel2);border:1px solid var(--line2);border-radius:4px;padding:0 5px;color:#c9e3f5}
+.warn{border-left-color:var(--src)!important}
+.warn h3{color:var(--src)}
+.tag{display:inline-block;font-family:var(--mono);font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:999px;border:1px solid currentColor;margin-left:6px;vertical-align:2px}
+.res{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.res span{font-family:var(--mono);font-size:.78rem;background:var(--panel2);border:1px solid var(--line2);border-radius:6px;padding:3px 9px}
+.res span b{color:var(--ac)}
+.foot{color:var(--dim2);font-size:.78rem;margin-top:40px;border-top:1px solid var(--line);padding-top:16px}
+.kol{display:inline-block;font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--src);border:1px solid rgba(224,124,74,.5);background:rgba(224,124,74,.08);border-radius:999px;padding:2px 8px;margin-left:8px;vertical-align:2px;white-space:nowrap}
+.net svg{width:100%;height:auto;display:block}
+.net{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:12px}
+.net text{font-family:var(--mono);font-size:11px;fill:var(--dim)}
+.net .t{font-family:var(--disp);font-size:14px;font-weight:600}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px}
+.flow span{font-family:var(--mono);font-size:.76rem;background:var(--panel2);border:1px solid var(--line2);border-radius:6px;padding:5px 9px}
+.flow span b{color:var(--ac)}
+.flow i{color:var(--dim2);font-style:normal;font-family:var(--mono)}
+</style>
+</head>
+<body>
+
+<nav class="topnav"><div class="topnav-inner">
+  <a href="#zaliczenie">Zaliczenie</a>
+  <a href="#program">Program</a>
+  <a href="#transmisja">Metody transmisji</a>
+  <a href="#tryby">Tryby i cechy sieci</a>
+  <a href="#poziomy">3 poziomy sieci</a>
+  <a href="#ftth">FTTH</a>
+  <span class="spacer"></span>
+  <a class="big" href="swiatlowody-fiszki.html">Fiszki -></a>
+</div></nav>
+
+<div class="wrap">
+<h1>Sieci światłowodowe <span>- szybka ściągawka</span></h1>
+<p class="lede">Notatka idzie kolejnością slajdów dr. Stępczaka, wykład po wykładzie. Kolosy to quizy na eKursach z bazy pytań, które <strong>powtarzają się prawie dosłownie od 2021 do 2025</strong>. Dlatego przy każdej sekcji jest znaczek <span class="kol" style="margin:0">na kolosie</span>, jeśli coś z niej wraca w pytaniach. Pytania z bazy są w <strong>fiszkach</strong>.</p>
+
+<!-- ===================================================== WYKŁAD 1 -->
+<p class="lecture">Wykład 1 · Wprowadzenie</p>
+<p class="lecture-sub">Organizacja przedmiotu, metody przesyłania informacji przez sieć i trzy poziomy sieci telekomunikacyjnej (szkieletowa, metropolitalna, dostępowa). Na slajdach to cały plik SŚ_W1 (slajdy 1-18).</p>
+
+<section id="zaliczenie">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--pow)"></div><h2>Zaliczenie</h2></div>
+  <div class="grid2">
+    <div class="card" style="border-left-color:var(--pow)">
+      <h3>Wykład: 2 kolokwia</h3>
+      <p>Quiz na eKursach, <b>2 × 50 pkt</b>. Zaliczenie od <b>51 pkt łącznie</b>, więc słabszy pierwszy kolos da się nadrobić drugim.</p>
+      <p>Typy pytań: <b>dopasuj</b> (najczęściej), <b>uzupełnij luki</b>, jednokrotny wybór, <b>ułóż w kolejności</b>, kilka zadań na budżet mocy łącza. Czas zwykle 40-70 min.</p>
+    </div>
+    <div class="card" style="border-left-color:var(--pow)">
+      <h3>Laboratorium</h3>
+      <p>Sprawozdania robione w trakcie ćwiczenia + <b>test końcowy</b> 8-12 pytań. Ocena = średnia ze sprawozdań i testu.</p>
+      <p>Ćwiczenia: złącza rozłączalne, spawanie, łącze jednofalowe, łącze dwukanałowe, OTDR w sieci PON, aplikacje FPI.</p>
+    </div>
+  </div>
+  <div class="tbl"><table>
+    <tr><th>Punkty (suma)</th><th>&lt;51</th><th>51-60</th><th>61-70</th><th>71-80</th><th>81-90</th><th>91-100</th></tr>
+    <tr><td><b>Ocena</b></td><td>2,0</td><td>3,0</td><td>3,5</td><td>4,0</td><td>4,5</td><td>5,0</td></tr>
+  </table></div>
+</section>
+
+<section id="program">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--met)"></div><h2>Program wykładów (mapa)</h2></div>
+  <div class="grid2">
+    <div class="card" style="border-left-color:var(--met)"><ul>
+      <li><b>Wstęp do sieci optycznych:</b> architektura, warstwa optyczna, sieci całkowicie optyczne, ewolucja</li>
+      <li><b>Podstawy:</b> dB i dBm, budżet mocy i pasma łącza, włókna, tłumienie, dyspersja, efekty nieliniowe</li>
+      <li><b>Elementy toru:</b> kable, złącza, sprzęgacze, izolatory, filtry, krotnice WDM i OADM</li>
+      <li><b>Elementy aktywne:</b> nadajniki, odbiorniki, modulatory, komutatory, wzmacniacze optyczne</li>
+    </ul></div>
+    <div class="card" style="border-left-color:var(--met)"><ul>
+      <li><b>Modulacja i detekcja</b> sygnałów optycznych</li>
+      <li><b>Przyrządy pomiarowe</b> (m.in. OTDR)</li>
+      <li><b>Sieci transportowe:</b> PDH, SDH, WDM</li>
+      <li><b>Sieci lokalne:</b> FDDI, Ethernet, Fibre Channel</li>
+      <li><b>Sieci pakietowe</b> i <b>dostępowe</b> (PON), kierunki rozwoju</li>
+    </ul></div>
+  </div>
+</section>
+
+<section id="transmisja">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--c)"></div><h2>Metody przesyłania informacji przez sieć</h2></div>
+  <div class="grid2">
+    <div class="card" style="border-left-color:var(--c)">
+      <h3>Zestawienie bezpośredniego połączenia</h3>
+      <p>Najpierw sieć zestawia <b>stałą ścieżkę end to end</b> między abonentami (np. A i D) przez kolejne węzły N, dopiero potem idzie transmisja. Ścieżka jest zajęta przez cały czas połączenia.</p>
+      <p>To jest <b>komutacja obwodów</b> (łączy), jak w klasycznej telefonii.</p>
+    </div>
+    <div class="card" style="border-left-color:var(--c)">
+      <h3>Przesyłanie pakietów</h3>
+      <p>Informacja jest dzielona na <b>pakiety</b>, a każdy węzeł przekazuje je dalej. Pakiety różnych abonentów dzielą te same łącza, a ścieżki mogą być różne.</p>
+      <p>To jest <b>komutacja pakietów</b>: pasmo przydzielane elastycznie, tylko gdy są dane.</p>
+    </div>
+  </div>
+</section>
+
+<section id="tryby">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--kir)"></div><h2>Tryby pracy i cechy sieci</h2><span class="kol">kolos 1: 2021, 2022 · 10 pkt</span></div>
+  <p style="color:var(--dim);font-size:.85rem;margin-bottom:6px">Na slajdach tego nie ma wprost, ale na kolosie jest pytanie "dobierz właściwe cechy do odpowiednich terminów". Poniżej klucz z zaliczonych podejść (oceniony jako poprawny), słowo w słowo:</p>
+  <div class="tbl"><table>
+    <tr><th>Termin</th><th>Cecha (odpowiedź z klucza)</th></tr>
+    <tr><td><b>Sieć w trybie komutacji obwodów</b></td><td>konfiguruje połączenie end to end przed transmisją</td></tr>
+    <tr><td><b>Sieć w trybie obwodu wirtualnego</b></td><td>generuje połączenia o wzorce ruchu z wyprzedzeniem</td></tr>
+    <tr><td><b>Sieć w trybie komutacji pakietów</b></td><td>elastycznie przydziela szerokość pasma</td></tr>
+    <tr><td><b>Połączeniowy tryb pracy sieci</b> umożliwia</td><td>przesyłanie informacji dwukierunkowo</td></tr>
+    <tr><td><b>Bezpołączeniowy tryb pracy sieci</b> umożliwia</td><td>przesyłanie informacji jednokierunkowo</td></tr>
+    <tr><td><b>Skalowalność sieci</b> to</td><td>dostosowywanie liczby węzłów i systemów użytkowników</td></tr>
+    <tr><td><b>Modułowość sieci</b> to</td><td>dodawanie lub redukowanie węzłów sieciowych bez konfliktów wykorzystania ścieżek</td></tr>
+    <tr><td><b>Topologia sieci</b></td><td>typu Mesh</td></tr>
+  </table></div>
+  <div class="card warn" style="margin-top:10px"><h3>Jak to zapamiętać</h3><p><b>Skalowalność</b> = ile (liczba węzłów i użytkowników). <b>Modułowość</b> = dokładanie i zabieranie węzłów bez kolizji ścieżek. <b>Połączeniowy</b> = jest połączenie, więc gadają w obie strony; <b>bezpołączeniowy</b> = wysyłasz w jedną stronę. Topologia jest jedyną "cechą", która jest nazwą, więc dostaje Mesh.</p></div>
+</section>
+
+<section id="poziomy">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--ac)"></div><h2>Sieć telekomunikacyjna: trzy poziomy</h2><span class="kol">kolos 1 2021 · kolos 2 2024, 2025 · 5-15 pkt</span></div>
+  <div class="net"><svg viewBox="0 0 780 250" role="img" aria-label="Sieć szkieletowa, metropolitalna i dostępowa">
+    <g stroke="#4a9fe0" stroke-width="2" fill="none">
+      <line x1="60" y1="70" x2="150" y2="50"/><line x1="150" y1="50" x2="220" y2="100"/><line x1="60" y1="70" x2="90" y2="150"/>
+      <line x1="90" y1="150" x2="190" y2="170"/><line x1="190" y1="170" x2="220" y2="100"/><line x1="150" y1="50" x2="90" y2="150"/>
+      <line x1="60" y1="70" x2="190" y2="170"/><line x1="220" y1="100" x2="300" y2="125"/>
+    </g>
+    <g fill="#11171d" stroke="#4a9fe0" stroke-width="2"><rect x="50" y="60" width="20" height="20" rx="4"/><rect x="140" y="40" width="20" height="20" rx="4"/><rect x="210" y="90" width="20" height="20" rx="4"/><rect x="80" y="140" width="20" height="20" rx="4"/><rect x="180" y="160" width="20" height="20" rx="4"/></g>
+    <circle cx="380" cy="125" r="75" fill="none" stroke="#2dd4bf" stroke-width="3"/>
+    <g fill="#11171d" stroke="#2dd4bf" stroke-width="2"><circle cx="305" cy="125" r="10"/><circle cx="380" cy="50" r="10"/><circle cx="455" cy="125" r="10"/><circle cx="380" cy="200" r="10"/></g>
+    <g stroke="#f2a93b" stroke-width="2"><line x1="465" y1="125" x2="560" y2="125"/><line x1="575" y1="125" x2="680" y2="60"/><line x1="575" y1="125" x2="690" y2="105"/><line x1="575" y1="125" x2="690" y2="150"/><line x1="575" y1="125" x2="680" y2="195"/></g>
+    <circle cx="568" cy="125" r="9" fill="#11171d" stroke="#f2a93b" stroke-width="2"/>
+    <g fill="#11171d" stroke="#f2a93b" stroke-width="2"><rect x="680" y="50" width="18" height="18" rx="3"/><rect x="690" y="96" width="18" height="18" rx="3"/><rect x="690" y="141" width="18" height="18" rx="3"/><rect x="680" y="186" width="18" height="18" rx="3"/></g>
+    <text x="140" y="215" text-anchor="middle" class="t" style="fill:#4a9fe0">szkieletowa</text><text x="140" y="233" text-anchor="middle">krata (mesh) · OXC</text>
+    <text x="380" y="235" text-anchor="middle" class="t" style="fill:#2dd4bf">metropolitalna</text><text x="380" y="121" text-anchor="middle">pierścień</text><text x="380" y="137" text-anchor="middle">ADM + OXC</text>
+    <text x="640" y="235" text-anchor="middle" class="t" style="fill:#f2a93b">dostępowa</text><text x="560" y="100" text-anchor="middle">rozgałęźnik</text>
+  </svg></div>
+
+  <p style="color:var(--dim);font-size:.85rem;margin:14px 0 4px">Tabela z rysunku na slajdzie 18. <b style="color:var(--text)">Na kolosie są dokładnie te wartości</b>, w pytaniu "dopasuj parametry do typów sieci":</p>
+  <div class="tbl"><table>
+    <tr><th></th><th>Szkieletowa</th><th>Metropolitalna</th><th>Dostępowa</th></tr>
+    <tr><td><b>Nazwa ang.</b></td><td>Core Network (CN), Long-Haul</td><td>Metropolitan Access Network (MAN)</td><td>Local Access Network (LAN)</td></tr>
+    <tr><td><b>Struktura</b></td><td>kratowa (mesh)</td><td>pierścieniowa</td><td>pierścień + gwiazda</td></tr>
+    <tr><td><b>Rozległość</b></td><td>~100 - 1000 km</td><td>~20 - 100 km</td><td>&lt; 20 km</td></tr>
+    <tr><td><b>Węzły</b></td><td>przełączniki OXC (XC)</td><td>multipleksery ADM i OXC</td><td>pasywne lub aktywne selektory (rozgałęźniki)</td></tr>
+    <tr><td><b>Technika transmisyjna</b></td><td>DWDM ~80 kanałów</td><td>CWDM ~16 kanałów</td><td>xPON, xDSL, Ethernet</td></tr>
+    <tr><td><b>Przepływność</b></td><td>10 - 40 Gb/s</td><td>2,5 - 10 Gb/s</td><td>&lt; 2,5 Gb/s</td></tr>
+    <tr><td><b>Co łączy</b></td><td>sieci metropolitalne (międzynarodowo, międzymiastowo)</td><td>sieci lokalne w obrębie aglomeracji</td><td>abonentów</td></tr>
+  </table></div>
+  <div class="grid2" style="margin-top:12px">
+    <div class="card warn"><h3>Pułapka: dwie wersje zasięgu</h3><p>Tekst slajdu 17 mówi o szkieletowej "kilkaset ÷ kilka tysięcy km", o metro "kilkadziesiąt km", a o dostępowej "od kilkuset metrów do 20 km" i topologii magistrali, pierścienia lub gwiazdy. <b>Na kolosie wybierasz wartości z rysunku:</b> 100-1000 km, 20-100 km, do 20 km, pierścień + gwiazda.</p></div>
+    <div class="card" style="border-left-color:var(--ac)"><h3>Skróty</h3><p><b>OXC / XC</b> - optical cross-connect, przełącznica optyczna (krzyżowa). <b>ADM / OADM</b> - (optical) add-drop multiplexer, krotnica transferowa: wyjmuje i dokłada kanały. <b>DWDM / CWDM</b> - gęste / rzadkie zwielokrotnienie falowe. <b>xPON</b> - pasywne sieci optyczne (GPON, EPON...).</p></div>
+  </div>
+  <div class="flow"><span>szkieletowa: <b>DWDM ~80</b>, <b>10-40 Gb/s</b></span><i>-></i><span>metro: <b>CWDM ~16</b>, <b>2,5-10 Gb/s</b></span><i>-></i><span>dostępowa: <b>xPON</b>, <b>&lt;2,5 Gb/s</b></span></div>
+  <p style="color:var(--dim);font-size:.82rem;margin-top:8px">Reguła: im bliżej abonenta, tym <b style="color:var(--text)">mniejszy zasięg, mniej kanałów i mniejsza przepływność</b>, a topologia przechodzi z kraty przez pierścień w gwiazdę.</p>
+</section>
+
+<section id="ftth">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--r)"></div><h2>Odcinki sieci FTTH</h2></div>
+  <p style="color:var(--dim);font-size:.85rem">FTTH (Fiber To The Home) to światłowód aż do mieszkania abonenta, część sieci dostępowej. Na rysunku ze slajdu 18 odcinki idą tak:</p>
+  <div class="flow"><span><b>OLT</b> obiekt centralny</span><i>-></i><span>odcinek <b>transportowy</b></span><i>-></i><span>odcinek <b>dystrybucyjny</b></span><i>-></i><span>odcinek <b>rozdzielczy</b></span><i>-></i><span>sieć wewnątrzbudynkowa zakończona w <b>ONT</b></span></div>
+  <p style="color:var(--dim);font-size:.82rem;margin-top:10px"><b style="color:var(--text)">OLT</b> (Optical Line Terminal) stoi u operatora, <b style="color:var(--text)">ONT</b> (Optical Network Terminal) u abonenta. Więcej o PON będzie na wykładzie o sieciach dostępowych.</p>
+</section>
+
+<p class="foot">Źródła: slajdy SŚ_W1 dr. Stępczaka, przeglądy prób kolokwiów 2021-2025 i bazy pytań z paczki. Kolejne wykłady dopisuję po każdym wykładzie.</p>
+</div>
+</body>
+</html>
