@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiszki egzaminacyjne - AiSD2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e12;
+    --panel:#11171d;
+    --panel2:#0d1217;
+    --line:#212b32;
+    --line2:#2a363f;
+    --text:#e9eef1;
+    --dim:#84939c;
+    --dim2:#4d5a63;
+
+    --quiz:#3ec9c2;       /* glowny akcent */
+    --quiz-l:rgba(62,201,194,.14);
+    --know:#5fb86a;
+    --know-l:rgba(95,184,106,.15);
+    --dontknow:#e0584a;
+    --dontknow-l:rgba(224,88,74,.15);
+    --amber:#f2a93b;
+    --amber-l:rgba(242,169,59,.14);
+
+    --disp:'Space Grotesk',sans-serif;
+    --body:'Inter',sans-serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
+  ::selection{background:var(--quiz);color:#06121c}
+
+  .hero{position:relative;overflow:hidden;padding:78px 0 44px;border-bottom:1px solid var(--line)}
+  .hero::before{content:'';position:absolute;inset:-20% -10%;
+    background:repeating-linear-gradient(135deg, transparent 0 42px, rgba(255,255,255,.02) 43px);
+    pointer-events:none}
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--quiz);margin:0 0 18px;font-weight:600;position:relative;z-index:1}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(2rem,5vw,3.1rem);line-height:1.1;
+    margin:0 0 18px;letter-spacing:-.015em;position:relative;z-index:1}
+  h1 .acc{color:var(--quiz)}
+  .lede{font-size:1.02rem;color:var(--dim);max-width:60ch;margin:0;position:relative;z-index:1}
+  .lede strong{color:var(--text);font-weight:500}
+  .hero-stats{display:flex;gap:9px;flex-wrap:wrap;margin-top:24px;position:relative;z-index:1}
+  .hero-stats span{font-family:var(--mono);font-size:.72rem;border:1px solid var(--line2);border-radius:999px;
+    padding:6px 13px;color:var(--dim)}
+
+  main{padding:48px 0 80px}
+
+  /* ---------- SETUP SCREEN ---------- */
+  #setupScreen .topic-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0 28px}
+  @media(max-width:540px){#setupScreen .topic-grid{grid-template-columns:1fr}}
+  .topic-card{background:var(--panel);border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;
+    cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:all .15s;user-select:none}
+  .topic-card:hover{border-color:var(--line2)}
+  .topic-card.checked{border-color:var(--quiz);background:var(--quiz-l)}
+  .topic-card .tname{font-family:var(--disp);font-weight:600;font-size:.92rem}
+  .topic-card .tcount{font-family:var(--mono);font-size:.74rem;color:var(--dim);background:var(--panel2);
+    border-radius:999px;padding:3px 10px}
+  .topic-card.checked .tcount{color:var(--quiz);background:rgba(62,201,194,.18)}
+  .topic-card .check{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--line2);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:.7rem;color:transparent;margin-right:10px}
+  .topic-card.checked .check{border-color:var(--quiz);background:var(--quiz);color:#06121c}
+  .topic-row-inner{display:flex;align-items:center}
+
+  .setup-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;align-items:center}
+  .btn{font-family:var(--mono);font-size:.84rem;font-weight:600;background:var(--quiz-l);border:1.5px solid var(--quiz);
+    color:var(--quiz);padding:13px 24px;border-radius:10px;cursor:pointer;transition:all .15s}
+  .btn:hover{background:var(--quiz);color:#06121c}
+  .btn.sec{background:transparent;border-color:var(--line2);color:var(--dim);padding:13px 20px}
+  .btn.sec:hover{border-color:var(--text);color:var(--text)}
+  .btn:disabled{opacity:.35;cursor:not-allowed}
+  .selcount{font-family:var(--mono);font-size:.82rem;color:var(--dim)}
+
+  .exam-gen-box{margin-top:36px;padding-top:28px;border-top:1px solid var(--line)}
+  .exam-gen-box h3{font-family:var(--disp);font-weight:600;font-size:1.1rem;margin:0 0 8px}
+  .exam-gen-box > p{color:var(--dim);font-size:.88rem;margin:0 0 18px;max-width:62ch}
+  .exam-tpl-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:560px){.exam-tpl-grid{grid-template-columns:1fr}}
+  .exam-tpl{background:var(--panel);border:1.5px solid var(--line);border-radius:13px;padding:18px 20px;
+    cursor:pointer;transition:all .15s;text-align:left}
+  .exam-tpl:hover{border-color:var(--amber);background:var(--amber-l)}
+  .exam-tpl .et-name{font-family:var(--disp);font-weight:600;font-size:1rem;color:var(--text);margin-bottom:4px}
+  .exam-tpl .et-meta{font-family:var(--mono);font-size:.74rem;color:var(--amber);margin-bottom:8px}
+  .exam-tpl .et-desc{font-size:.82rem;color:var(--dim);line-height:1.5}
+
+  .exam-banner{background:var(--amber-l);border:1.5px solid var(--amber);border-radius:12px;padding:14px 18px;
+    margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+  .exam-banner .eb-name{font-family:var(--disp);font-weight:600;color:var(--amber);font-size:.94rem}
+  .exam-banner .eb-timer{font-family:var(--mono);font-weight:700;color:var(--amber);font-size:1.1rem}
+
+  /* ---------- EXAM PAPER (wszystkie pytania naraz) ---------- */
+  #examPaperScreen{display:none}
+  .exam-paper-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;
+    margin-bottom:10px;position:sticky;top:0;background:var(--bg);padding:14px 0;z-index:20;border-bottom:1px solid var(--line)}
+  .ep-name{font-family:var(--disp);font-weight:700;font-size:1.15rem;color:var(--amber)}
+  .ep-progress{font-family:var(--mono);font-size:.8rem;color:var(--dim);margin-top:3px}
+  .ep-actions{display:flex;gap:9px;flex-wrap:wrap}
+
+  .exam-q{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin:18px 0}
+  .exam-q.graded{border-color:var(--line2)}
+  .exam-q .eq-num{font-family:var(--mono);font-size:.74rem;color:var(--amber);font-weight:700;margin-bottom:8px}
+  .exam-q .fc-tag{display:inline-block;font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.04em;
+    background:var(--quiz-l);color:var(--quiz);border-radius:7px;padding:5px 11px;margin-bottom:14px}
+  .exam-q .fc-title{font-family:var(--disp);font-weight:600;font-size:1.1rem;line-height:1.4;margin:0 0 12px;color:var(--text)}
+  .exam-q .fc-body{font-size:.95rem;color:var(--dim)}
+  .exam-q .fc-body p{margin:0 0 10px} .exam-q .fc-body p:last-child{margin-bottom:0}
+  .exam-q .fc-body code{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:5px;
+    padding:1px 7px;font-size:.88em;color:#c9e3f5}
+  .exam-q .eq-reveal-wrap{margin-top:18px}
+  .exam-q .eq-answer{display:none;margin-top:18px;padding-top:18px;border-top:1px dashed var(--line2)}
+  .exam-q .eq-answer.show{display:block;animation:fadein .2s ease}
+  .exam-q .eq-grade-row{display:flex;gap:10px;margin-top:18px}
+  .exam-q .grade-btn{flex:1;font-family:var(--disp);font-weight:600;font-size:.9rem;padding:13px;border-radius:10px;
+    cursor:pointer;transition:all .15s;border:1.5px solid var(--line2);background:var(--panel2);color:var(--dim)}
+  .exam-q .grade-btn.active-know{border-color:var(--know);color:var(--know);background:var(--know-l)}
+  .exam-q .grade-btn.active-dontknow{border-color:var(--dontknow);color:var(--dontknow);background:var(--dontknow-l)}
+  .exam-q .eq-graded-pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.76rem;
+    font-weight:600;padding:6px 13px;border-radius:999px;margin-top:14px}
+  .exam-q .eq-graded-pill.know{background:var(--know-l);color:var(--know)}
+  .exam-q .eq-graded-pill.dontknow{background:var(--dontknow-l);color:var(--dontknow)}
+
+  .ep-finish-banner{text-align:center;padding:30px 0 10px}
+  .ep-finish-banner p{color:var(--dim);font-size:.9rem;margin:0 0 16px}
+
+  /* ---------- QUIZ SCREEN ---------- */
+  #quizScreen{display:none}
+  .quiz-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+  .progress-text{font-family:var(--mono);font-size:.78rem;color:var(--dim)}
+  .live-score{font-family:var(--mono);font-size:.78rem;display:flex;gap:14px}
+  .live-score .k{color:var(--know)} .live-score .d{color:var(--dontknow)}
+  .progress-bar{height:5px;background:var(--panel2);border-radius:99px;overflow:hidden;margin-bottom:26px}
+  .progress-fill{height:100%;background:var(--quiz);border-radius:99px;transition:width .25s}
+
+  .flashcard{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:30px 28px;min-height:200px}
+  .fc-tag{display:inline-block;font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.04em;
+    background:var(--quiz-l);color:var(--quiz);border-radius:7px;padding:5px 11px;margin-bottom:16px}
+  .fc-title{font-family:var(--disp);font-weight:600;font-size:1.18rem;line-height:1.4;margin:0 0 14px;color:var(--text)}
+  .fc-body{font-size:.96rem;color:var(--dim)}
+  .fc-body p{margin:0 0 10px} .fc-body p:last-child{margin-bottom:0}
+  .fc-body code{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:5px;
+    padding:1px 7px;font-size:.88em;color:#c9e3f5}
+
+  .fc-divider{border:none;border-top:1px dashed var(--line2);margin:24px 0}
+
+  .fc-answer{display:none}
+  .fc-answer.show{display:block;animation:fadein .2s ease}
+  @keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+  .fc-answer h5{font-family:var(--disp);font-weight:600;color:var(--know);margin:0 0 12px;font-size:1rem}
+  .fc-answer p{font-size:.94rem;color:var(--dim);margin:0 0 11px;line-height:1.7}
+  .fc-answer p:last-child{margin-bottom:0}
+  .fc-answer strong{color:var(--text);font-weight:600}
+  .fc-answer code{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:5px;
+    padding:1px 7px;font-size:.88em;color:#c9e3f5}
+
+  .fc-answer table.tm{width:100%;border-collapse:collapse;margin:10px 0 14px;font-family:var(--mono);font-size:.82rem}
+  .fc-answer table.tm th,.fc-answer table.tm td{border:1px solid var(--line);padding:7px 10px;text-align:center}
+  .fc-answer table.tm th{background:var(--panel2);color:var(--dim);font-weight:600;font-size:.72rem;text-transform:uppercase}
+  .fc-answer table.tm td.state{color:var(--quiz);font-weight:600}
+
+  .fc-answer .formula{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:14px 18px;
+    text-align:center;font-family:var(--mono);font-size:1.02rem;margin:10px 0;color:var(--text)}
+  .fc-answer .note{font-size:.86rem;color:var(--dim2);border-left:3px solid var(--line2);padding:2px 0 2px 12px;margin-top:10px}
+  .fc-answer .pill{display:inline-block;font-family:var(--mono);font-size:.68rem;font-weight:600;border-radius:6px;
+    padding:2px 8px;background:var(--amber-l);color:var(--amber);margin-right:6px}
+  .fc-answer a.jump{display:inline-block;font-family:var(--mono);font-size:.72rem;font-weight:600;text-decoration:none;
+    color:#06121c;background:var(--quiz);border-radius:6px;padding:4px 10px;margin-top:6px}
+
+  pre.cpp{position:relative;font-family:var(--mono);font-size:.82rem;line-height:1.7;background:var(--bg);
+    color:#dce7ea;border-radius:10px;padding:14px 16px;margin:10px 0;overflow-x:auto;border:1px solid var(--line)}
+  pre.cpp code{white-space:pre;display:block}
+  pre.cpp .kw{color:#7fc7e8;font-weight:600}
+  pre.cpp .tp{color:#9fd9b4;font-weight:600}
+  pre.cpp .cm{color:#64808c;font-style:italic}
+  pre.cpp .st{color:#e3b56b}
+  pre.cpp .nm{color:#d99a8f}
+
+  .reveal-wrap{margin-top:22px;text-align:center}
+  .reveal-btn-big{font-family:var(--mono);font-size:.88rem;font-weight:600;background:var(--quiz-l);
+    border:1.5px solid var(--quiz);color:var(--quiz);padding:13px 28px;border-radius:10px;cursor:pointer;transition:all .15s}
+  .reveal-btn-big:hover{background:var(--quiz);color:#06121c}
+
+  .grade-row{display:flex;gap:12px;margin-top:24px}
+  .grade-btn{flex:1;font-family:var(--disp);font-weight:600;font-size:.96rem;padding:16px;border-radius:12px;
+    cursor:pointer;transition:all .15s;border:1.5px solid var(--line2);background:var(--panel2);color:var(--dim)}
+  .grade-btn.know:hover{border-color:var(--know);color:var(--know);background:var(--know-l)}
+  .grade-btn.dontknow:hover{border-color:var(--dontknow);color:var(--dontknow);background:var(--dontknow-l)}
+
+  .quiz-foot{display:flex;justify-content:space-between;margin-top:18px}
+  .quiz-foot .btn.sec{padding:9px 16px;font-size:.76rem}
+
+  /* ---------- RESULTS SCREEN ---------- */
+  #resultsScreen{display:none;text-align:center}
+  .result-ring{width:160px;height:160px;margin:20px auto 24px;position:relative}
+  .result-ring svg{transform:rotate(-90deg)}
+  .result-ring .pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-family:var(--disp);font-weight:700;font-size:2rem;color:var(--text)}
+  .result-headline{font-family:var(--disp);font-weight:600;font-size:1.3rem;margin:0 0 8px}
+  .result-sub{color:var(--dim);font-size:.94rem;margin:0 0 28px}
+  .result-stats{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:32px}
+  .rstat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 22px;min-width:110px}
+  .rstat .n{font-family:var(--mono);font-weight:700;font-size:1.4rem}
+  .rstat .l{font-family:var(--mono);font-size:.68rem;color:var(--dim);text-transform:uppercase;letter-spacing:.04em;margin-top:4px}
+  .rstat.know .n{color:var(--know)} .rstat.dontknow .n{color:var(--dontknow)}
+
+  .topic-breakdown{text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:20px 22px;margin-bottom:28px}
+  .topic-breakdown h3{font-family:var(--disp);font-size:.98rem;font-weight:600;margin:0 0 14px}
+  .tb-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:.84rem}
+  .tb-row:last-child{margin-bottom:0}
+  .tb-row .tb-name{font-family:var(--mono);width:150px;flex-shrink:0;color:var(--dim);font-size:.78rem}
+  .tb-row .tb-bar{flex:1;height:8px;background:var(--panel2);border-radius:99px;overflow:hidden}
+  .tb-row .tb-fill{height:100%;background:var(--know);border-radius:99px}
+  .tb-row .tb-frac{font-family:var(--mono);font-size:.76rem;color:var(--dim);width:46px;text-align:right;flex-shrink:0}
+
+  .result-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+  footer{border-top:1px solid var(--line);padding:30px 0 50px;text-align:center;color:var(--dim2);font-size:.82rem;font-family:var(--mono)}
+
+  @media(max-width:600px){
+    .hero{padding:56px 0 36px}
+    .flashcard{padding:22px 18px}
+    .grade-row{flex-direction:column}
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="wrap">
+    <p class="eyebrow">AiSD2 · tryb testowy</p>
+    <h1>Fiszki egzaminacyjne - <span class="acc">sprawdź się</span> naprawdę</h1>
+    <p class="lede">Pytania z egzaminów Tyszera 2020-2025 z przerobionych wykładów plus własne z tych samych slajdów. Każde "co wypisze" sprawdzone w g++, przy każdym rozwiązanie krok po kroku. Pula rośnie z każdym wykładem.</p>
+    <div class="hero-stats" id="heroStats"></div>
+  </div>
+</div>
+
+<main>
+  <div class="wrap">
+
+    <!-- ========== SETUP ========== -->
+    <div id="setupScreen">
+      <p style="color:var(--dim);font-size:.92rem;margin:0 0 6px">Wybierz tematy do przetestowania (albo zostaw wszystkie zaznaczone):</p>
+      <div class="topic-grid" id="topicGrid"></div>
+      <div class="setup-actions">
+        <button class="btn" id="startBtn">▶ Zacznij test</button>
+        <button class="btn sec" id="selectAllBtn">zaznacz wszystkie</button>
+        <button class="btn sec" id="selectNoneBtn">odznacz wszystkie</button>
+        <span class="selcount" id="selCount"></span>
+      </div>
+
+      <div class="exam-gen-box">
+        <h3>📝 Albo wygeneruj losowy egzamin</h3>
+        <p>Schemat liczby pytań z każdego tematu odzwierciedla proporcje z nadesłanych prawdziwych egzaminów - nie losowy zestaw, tylko realistyczna symulacja.</p>
+        <div class="exam-tpl-grid" id="examTplGrid"></div>
+      </div>
+    </div>
+
+    <!-- ========== QUIZ ========== -->
+    <div id="quizScreen">
+      <div class="exam-banner" id="examBanner" style="display:none">
+        <span class="eb-name" id="ebName">Egzamin</span>
+      </div>
+      <div class="quiz-top">
+        <div class="progress-text" id="progressText">fiszka 1/119</div>
+        <div class="live-score">
+          <span class="k" id="liveKnow">✓ 0</span>
+          <span class="d" id="liveDontknow">✗ 0</span>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+      <div class="flashcard">
+        <div class="fc-tag" id="fcTag">TAG</div>
+        <h3 class="fc-title" id="fcTitle">Pytanie…</h3>
+        <div class="fc-body" id="fcBody"></div>
+
+        <div class="reveal-wrap" id="revealWrap">
+          <button class="reveal-btn-big" id="revealBtn">▸ Pokaż rozwiązanie</button>
+        </div>
+
+        <div class="fc-answer" id="fcAnswerWrap">
+          <hr class="fc-divider">
+          <div id="fcAnswer"></div>
+          <div class="grade-row">
+            <button class="grade-btn dontknow" id="gradeNo">✗ Nie wiedziałem</button>
+            <button class="grade-btn know" id="gradeYes">✓ Wiedziałem</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="quiz-foot">
+        <button class="btn sec" id="quitBtn"><- Przerwij test</button>
+        <button class="btn sec" id="backCardBtn" style="display:none">↩ Cofnij ocenę</button>
+      </div>
+    </div>
+
+    <!-- ========== EXAM PAPER (wszystkie pytania naraz) ========== -->
+    <div id="examPaperScreen">
+      <div class="exam-paper-head" id="examPaperHead">
+        <div>
+          <div class="ep-name" id="epName">Egzamin</div>
+          <div class="ep-progress" id="epProgress">0 / 0 ocenione</div>
+        </div>
+        <div class="ep-actions">
+          <button class="btn sec" id="epQuitBtn"><- Przerwij</button>
+          <button class="btn" id="epFinishBtn">Zakończ i zobacz wynik</button>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="epProgressFill" style="width:0%"></div></div>
+      <div id="examQuestionsList"></div>
+    </div>
+
+    <!-- ========== RESULTS ========== -->
+    <div id="resultsScreen">
+      <div class="result-ring">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          <circle cx="80" cy="80" r="70" fill="none" stroke="#1a232b" stroke-width="14"/>
+          <circle id="ringFill" cx="80" cy="80" r="70" fill="none" stroke="#3ec9c2" stroke-width="14"
+            stroke-dasharray="440" stroke-dashoffset="440" stroke-linecap="round"/>
+        </svg>
+        <div class="pct" id="resultPct">0%</div>
+      </div>
+      <h2 class="result-headline" id="resultHeadline">Wynik</h2>
+      <p class="result-sub" id="resultSub">-</p>
+
+      <div class="result-stats">
+        <div class="rstat know"><div class="n" id="rsKnow">0</div><div class="l">wiedziałem</div></div>
+        <div class="rstat dontknow"><div class="n" id="rsDontknow">0</div><div class="l">nie wiedziałem</div></div>
+        <div class="rstat"><div class="n" id="rsTotal">0</div><div class="l">razem</div></div>
+      </div>
+
+      <div class="topic-breakdown" id="topicBreakdown">
+        <h3>Wynik wg tematu</h3>
+        <div id="tbRows"></div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn" id="retryMissedBtn">↻ Powtórz tylko błędy</button>
+        <button class="btn sec" id="retryAllBtn">↺ Zacznij od nowa</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <p>Fiszki egzaminacyjne AiSD2 · wyniki kodu sprawdzone w g++</p>
+</footer>
+
+<script>
+const T1='Klasy, konstruktory, destruktor', T2='Przyjaźń i operatory', T3='Dziedziczenie i polimorfizm', T4='Wskaźniki i pamięć', T5='Wzorce i pojemniki';
+const NT='aisd2-sciezka-szybka.html';
+const jump=(href,txt)=>`<a class="jump" href="${href}" target="_blank" style="display:inline-block;margin-top:8px;font-size:.76rem">-> ${txt}</a>`;
+const src=t=>`<p style="display:inline-block;font-family:var(--mono);font-size:.7rem;font-weight:700;color:#e07c4a;border:1px solid rgba(224,124,74,.5);border-radius:999px;padding:2px 9px;margin:0 0 8px">${t}</p>`;
+const cpp=c=>`<pre class="cpp"><code>${c}</code></pre>`;
+
+const CARDS = [
+/* ================= T1 ================= */
+{id:'k1',tag:'UZUPEŁNIJ · EGZAMIN',topic:T1,
+ title:'Uzupełnij definicję konstruktora kopiującego obiektu klasy Complex zdefiniowanej na wykładzie.',
+ body:`${src('egzamin 02.02.2024 · 1 p.')}${cpp(`Complex :: ________ (const ________) { re = ______.re; im = ______.im; }`)}`,
+ answer:`<h5>✅ Odpowiedź</h5>${cpp(`Complex :: Complex (const Complex &amp;c) { re = c.re; im = c.im; }`)}<p>Konstruktor nazywa się jak klasa. Parametr to <strong>stała referencja</strong> do obiektu tej samej klasy, a w ciele przepisujesz pola z oryginału. Nazwa parametru dowolna (c, original, source).</p><p class="note">Bez &amp; to błąd kompilacji: przekazanie przez wartość samo wymagałoby kopii, czyli tego konstruktora (karta obok).</p>${jump(NT+'#copy','konstruktor kopiujący')}`},
+{id:'k2',tag:'TEORIA · EGZAMIN',topic:T1,
+ title:'W jaki sposób musi być przekazywany parametr do konstruktora kopiującego? Dlaczego?',
+ body:`${src('egzamin 2023 · 1 p.')}`,
+ answer:`<h5>✅ Odpowiedź: przez referencję (zwykle const &amp;)</h5><p>Przekazanie przez wartość robi <strong>lokalną kopię</strong> argumentu, a do zrobienia kopii trzeba wywołać konstruktor kopiujący. Ten znowu dostaje argument przez wartość, więc znowu potrzebuje kopii... <strong>nieskończona rekurencja</strong>. Kompilator na to nie pozwala.</p><p class="note">const, bo kopiowanie nie powinno zmieniać oryginału, i dzięki temu da się też skopiować obiekt tymczasowy.</p>`},
+{id:'k3',tag:'ZAZNACZ · EGZAMIN',topic:T1,
+ title:'Wybierz wszystkie prawidłowe stwierdzenia o destruktorze.',
+ body:`${src('egzamin 05.02.2025 · 1 p.')}<p>a) Destruktor zwalnia pamięć zajmowaną przez obiekt.<br>b) Destruktor nie może być przeładowany.<br>c) Destruktor jest automatycznie wywoływany, gdy obiekt wychodzi ze swojego zakresu ważności.<br>d) Destruktor może przyjmować parametry (argumenty) domyślne.</p>`,
+ answer:`<h5>✅ Odpowiedź: b, c</h5><p><strong>a) fałsz</strong> - slajd mówi wprost: destruktor <strong>nie likwiduje obiektu ani nie zwalnia pamięci</strong> zajmowanej przez obiekt. Wykonuje tylko czynności przed likwidacją (np. <code>delete []</code> na tablicy, którą obiekt sam zaalokował).<br><strong>b) prawda</strong> - nie ma parametrów, więc nie ma czym się różnić.<br><strong>c) prawda.</strong><br><strong>d) fałsz</strong> - destruktor nie przyjmuje żadnych parametrów.</p>${jump(NT+'#ctor','destruktor')}`},
+{id:'k4',tag:'CZY SIĘ SKOMPILUJE',topic:T1,
+ title:'Czy da się w konstruktorze Cylinder ustawić base w ciele zamiast na liście inicjacyjnej?',
+ body:`${cpp(`class Circle {
+  double radius;
+public:
+  Circle(double r) : radius(r) { }
+};
+class Cylinder {
+  double height; Circle base;
+public:
+  Cylinder(double h, double r) { height = h; base = Circle(r); }
+};`)}`,
+ answer:`<h5>✅ Odpowiedź: nie, błąd kompilacji</h5><p>Zanim wykona się ciało konstruktora, wszystkie pola muszą być już utworzone. Pole <code>base</code> nie jest na liście, więc kompilator próbuje <code>Circle()</code> bez argumentów, a takiego konstruktora nie ma (jest tylko <code>Circle(double)</code>).</p>${cpp(`Cylinder(double h, double r) : height(h), base(r) {}`)}<p class="note">Zasada ze slajdu: składnik będący obiektem innej klasy inicjujesz wywołaniem jego konstruktora na liście inicjacyjnej.</p>`},
+{id:'k5',tag:'KONWERSJA',topic:T1,
+ title:'Czy result = cSum(argument, 2.5); się skompiluje, gdy cSum przyjmuje (Complex, Complex)?',
+ body:`<p>Rozważ dwie wersje konstruktora:</p>${cpp(`<span class="cm">// wersja A</span>
+Complex (double r, double i) : re(r), im(i) {}
+<span class="cm">// wersja B</span>
+Complex (double r = 0.0, double i = 0.0) : re(r), im(i) {}`)}`,
+ answer:`<h5>✅ Odpowiedź: A - nie, B - tak</h5><p>W wersji B konstruktor da się wywołać z <strong>jednym</strong> argumentem <code>double</code>, więc działa jak konwerter <code>double -&gt; Complex</code>: kompilator sam zrobi <code>Complex(2.5, 0)</code>.</p><p>W wersji A trzeba dwóch argumentów, więc żadnej niejawnej konwersji nie ma i trzeba by dopisywać <code>cSum(Complex, double)</code>, <code>cSum(double, Complex)</code>...</p>${jump(NT+'#konw','konwersje')}`},
+{id:'k6',tag:'FUNKCJA KONWERTUJĄCA',topic:T1,
+ title:'Jak zamienić obiekt Complex na int? Dlaczego takiej funkcji nie da się przeładować?',
+ body:`<p>Napisz składnik klasy, który zwraca część rzeczywistą jako int.</p>`,
+ answer:`<h5>✅ Odpowiedź</h5>${cpp(`operator int () {
+  return int(re);
+}`)}<p>Funkcja konwertująca: bez typu wyniku przed nazwą (typ jest w nazwie) i <strong>bez argumentów</strong>. Skoro nie ma argumentów, nie da się zrobić dwóch wersji różniących się listą parametrów, czyli <strong>nie można jej przeładować</strong>.</p><p class="note">Konstruktor zamienia obcy typ na mój, funkcja konwertująca mój na obcy.</p>`},
+{id:'k7',tag:'PRZENOSZENIE',topic:T1,
+ title:'Czym różni się konstruktor przenoszący od kopiującego? Napisz go dla Vector.',
+ body:`<p>Pola: <code>double *ptr; int size;</code></p>`,
+ answer:`<h5>✅ Odpowiedź</h5>${cpp(`Vector :: Vector (Vector &amp;&amp;original) {
+  size = original.size;
+  ptr = original.ptr;        <span class="cm">// "kradnie" tablicę</span>
+  original.ptr = nullptr;
+  original.size = 0;
+}`)}<p>Parametr to <code>&amp;&amp;</code>, referencja do <strong>r-wartości</strong> (obiektu tymczasowego). Kopiujący alokuje nową tablicę i przepisuje elementy, przenoszący <strong>przejmuje wskaźnik</strong>, więc nic nie kopiuje. Źródło dostaje <code>nullptr</code>, żeby jego destruktor nie usunął tablicy drugi raz.</p>`},
+
+/* ================= T2 ================= */
+{id:'o1',tag:'ZAZNACZ · EGZAMIN',topic:T2,
+ title:'Zaznacz poprawne stwierdzenie bądź stwierdzenia dotyczące przeładowania operatorów.',
+ body:`${src('egzamin 02.02.2024 · 1 p.')}<p>a) pozwala na zmianę ich priorytetów.<br>b) może nadać operatorowi dowolne znaczenie.<br>c) nie może zmieniać typu wyniku zwracanego przez operator.<br>d) wymaga, by przynajmniej jeden z argumentów operatora był typu zdefiniowanego w programie.<br>e) pozwala na zmianę reguł łączności.</p>`,
+ answer:`<h5>✅ Odpowiedź: b, d</h5><p>Ze slajdu: przeładowanie może nadać operatorowi <strong>dowolne znaczenie, łącznie z typem wyniku</strong> (więc c fałsz). Nie można zmienić <strong>priorytetów, reguł łączności ani liczby argumentów</strong> (a, e fałsz). Przynajmniej jeden argument musi być typu zdefiniowanego w programie (d).</p>${jump(NT+'#oper','operatory')}`},
+{id:'o2',tag:'TEORIA · EGZAMIN',topic:T2,
+ title:'Jakich własności operatora nie można zmienić w języku C++?',
+ body:`${src('egzamin 05.02.2025 · 1 p.')}`,
+ answer:`<h5>✅ Odpowiedź: priorytetu, reguł łączności i liczby argumentów</h5><p>Można natomiast zmienić znaczenie i typ wyniku. Dodatkowo nie da się przeładować operatora, którego wszystkie argumenty są typów wbudowanych (np. <code>operator+(int, double)</code>).</p>`},
+{id:'o3',tag:'NAPISZ · EGZAMIN',topic:T2,
+ title:'Zdefiniuj operator, który odejmuje dwie liczby zespolone. Jeśli trzeba, uzupełnij klasę Complex.',
+ body:`${src('egzamin 2023 · 1 p.')}${cpp(`class Complex {
+  double re, im;
+public:
+  Complex (double r = 0.0, double i = 0.0) : re(r), im(i) { }
+};`)}`,
+ answer:`<h5>✅ Odpowiedź</h5>${cpp(`class Complex {
+  double re, im;
+public:
+  Complex (double r = 0.0, double i = 0.0) : re(r), im(i) { }
+  friend Complex operator- (Complex, Complex);
+};
+Complex operator- (Complex a1, Complex a2) {
+  return Complex(a1.re - a2.re, a1.im - a2.im);
+}`)}<p><code>re</code> i <code>im</code> są prywatne, więc operator spoza klasy musi być <strong>przyjacielem</strong> (to jest to "uzupełnij klasę"). Odejmowanie nie zmienia argumentów, więc według reguły z wykładu robi się je poza klasą.</p><p class="note">Też poprawnie (składowa, jeden argument mniej): <code>Complex operator- (Complex a){ return Complex(re - a.re, im - a.im); }</code></p>`},
+{id:'o4',tag:'UZUPEŁNIJ · EGZAMIN',topic:T2,
+ title:'Wpisz po jednej instrukcji w puste linie, aby program się kompilował i aby klasa B była abstrakcyjna.',
+ body:`${src('egzamin 02.02.2024 · 1 p.')}${cpp(`class B;
+class A {
+public:
+  int reader(B toRead);
+};
+class B {
+  int number;
+  ____________________
+  ____________________
+};
+int A::reader(B toRead){return toRead.number;}
+int main() { return 1;}`)}`,
+ answer:`<h5>✅ Odpowiedź (zamierzona)</h5>${cpp(`  friend int A::reader(B);
+  virtual void f() = 0;`)}<p><strong>friend</strong>: <code>A::reader</code> czyta prywatne <code>number</code>, więc B musi ją zaprzyjaźnić. <strong>Czysta funkcja wirtualna</strong> (<code>= 0</code>) robi z B klasę abstrakcyjną.</p><p class="note">Uwaga: g++ (C++17 i C++20) i tak zgłasza błąd, bo <code>reader</code> przyjmuje B <b>przez wartość</b>, a parametru typu klasy abstrakcyjnej być nie może. Na egzaminie wpisz te dwie linie, bo o to chodzi w zadaniu.</p>`},
+{id:'o5',tag:'CO SIĘ STANIE · STARY',topic:T2,
+ title:'Jaką wartość przyjmuje D.index po wykonaniu programu?',
+ body:`${src('stara poprawka Tyszera')}${cpp(`class test {
+public:
+  int index;
+  void operator++() { index += 2; }
+} D;
+int main() {
+  D.index = 0;
+  for (int i = 0; i &lt; 5; i++) { D++; }
+  return 0;
+}`)}`,
+ answer:`<h5>✅ Odpowiedź: błąd kompilacji</h5><p><code>operator++()</code> bez parametru to <strong>przedrostkowy</strong> <code>++D</code>. Przyrostkowy <code>D++</code> to osobny operator <code>operator++(int)</code> (sztuczny parametr int), a takiego nie ma. g++: <em>no 'operator++(int)' declared for postfix '++'</em>.</p><p class="note">Gdyby było <code>++D</code>: index = 10.</p>`},
+{id:'o6',tag:'W KLASIE CZY POZA',topic:T2,
+ title:'Kiedy operator przeładowuje się jako składnik klasy, a kiedy poza nią? Które muszą być składowymi?',
+ body:`<p>Podaj regułę z wykładu i przykłady.</p>`,
+ answer:`<h5>✅ Odpowiedź</h5><p><strong>Zmienia obiekt</strong>, na którym działa -&gt; składnik klasy: <code>=</code>, <code>++</code>, <code>+=</code>, <code>*=</code>.<br><strong>Nie zmienia</strong> -&gt; poza klasą: <code>+ - * / &amp; !</code>.<br><strong>Muszą być składowymi:</strong> <code>=</code>, <code>[ ]</code>, <code>( )</code>, <code>-&gt;</code>.<br>Składowa ma <strong>o jeden argument mniej</strong> (lewy to obiekt <code>this</code>).<br>Predefiniowane dla każdej klasy: <code>=</code>, <code>&amp;</code>, przecinek, <code>new</code>, <code>delete</code>.</p>`},
+{id:'o7',tag:'CZY SIĘ SKOMPILUJE',topic:T2,
+ title:'operator+ jest składnikiem klasy Complex. Czy zadziała double + Complex?',
+ body:`${cpp(`Complex Complex :: operator+ (Complex a1) {
+  return Complex(re + a1.re, im + a1.im);
+}
+double second = 2.5;
+Complex argument(1, 2);
+Complex result = second + argument;`)}`,
+ answer:`<h5>✅ Odpowiedź: nie</h5><p>Operator składowy wywołuje się na <strong>lewym</strong> argumencie: <code>second.operator+(argument)</code>. Lewy to <code>double</code>, a typ double nie ma operatora + przyjmującego Complex. Konwersja przez konstruktor nie działa dla lewego argumentu składowej.</p><p><code>argument + second</code> by zadziałało (2.5 zamienione na Complex). Żeby działały oba kierunki, operator + robi się <strong>poza klasą</strong> jako <code>friend</code>.</p>`},
+{id:'o8',tag:'PRZYJAŹŃ',topic:T2,
+ title:'A jest przyjacielem B, B jest przyjacielem C. Czy A ma dostęp do prywatnych składników C? A przyjaciel klasy bazowej do pochodnej?',
+ body:`<p>Dwie reguły o przyjaźni ze slajdów.</p>`,
+ answer:`<h5>✅ Odpowiedź: w obu przypadkach nie</h5><p><strong>Przyjaciel mojego przyjaciela NIE jest moim przyjacielem</strong> - przyjaźń nie jest przechodnia.<br><strong>Przyjaźń nie jest dziedziczna</strong> - funkcja zaprzyjaźniona z klasą bazową nie ma dostępu do chronionych składników klasy pochodnej.</p><p class="note">Przyjaźń daje klasa, która udostępnia dane: <code>friend</code> piszesz w środku tej klasy.</p>`},
+
+/* ================= T3 ================= */
+{id:'d1',tag:'TEORIA · EGZAMIN',topic:T3,
+ title:'Jaki dostęp do składników private, protected i public klasy bazowej ma klasa pochodna przy dziedziczeniu typu protected?',
+ body:`${src('egzamin 2023 · 1,5 p.')}<p>Załóż brak użycia mechanizmu przyjaźni.</p>`,
+ answer:`<h5>✅ Odpowiedź</h5><table class="tm"><tr><th>w bazie</th><th>w pochodnej (protected)</th></tr><tr><td>private</td><td>niedostępne</td></tr><tr><td>protected</td><td>protected</td></tr><tr><td>public</td><td>protected</td></tr></table><p>Klasa pochodna ma dostęp tylko do składników <strong>public i protected</strong> bazy, a w niej oba stają się <strong>protected</strong>. Prywatne bazy nigdy nie są dostępne z pochodnej.</p>${jump(NT+'#inh','tabela dziedziczenia')}`},
+{id:'d2',tag:'TEORIA · EGZAMIN',topic:T3,
+ title:'Czym różni się tryb dziedziczenia private od trybu dziedziczenia protected w C++?',
+ body:`${src('egzamin 05.02.2025 · 0,5 p.')}`,
+ answer:`<h5>✅ Odpowiedź</h5><p>W obu trybach public i protected z bazy są dostępne w klasie pochodnej, a private niedostępne. Różnica:<br><strong>private</strong>: odziedziczone składniki stają się w pochodnej <strong>private</strong>, więc <strong>kolejna klasa pochodna</strong> (wnuk) już ich nie widzi.<br><strong>protected</strong>: stają się <strong>protected</strong>, więc kolejne klasy pochodne dalej mają do nich dostęp.</p><p class="note">Z zewnątrz (przez obiekt) w obu trybach nic z bazy nie jest dostępne.</p>`},
+{id:'d3',tag:'CO WYPISZE · EGZAMIN',topic:T3,
+ title:'Co zostanie wyświetlone w wyniku działania poniższego kodu? (MagicHorse)',
+ body:`${src('egzamin 02.02.2024 · 1,5 p.')}${cpp(`class Animal {
+public:
+  Animal() { cout &lt;&lt; "A"; }
+  virtual void dispData() { cout &lt;&lt; " M "; }
+};
+class Horse : public Animal {
+  char msc;
+public:
+  Horse(char m) : msc(m) { cout &lt;&lt; " H " &lt;&lt; msc; }
+  virtual ~Horse() { cout &lt;&lt; " E " &lt;&lt; msc; }
+  virtual void dispData() { cout &lt;&lt; " R " &lt;&lt; msc; }
+};
+class MagicHorse : public Horse {
+  char msc;
+public:
+  MagicHorse(char m1, char m2) : Horse(m1), msc(m2) { cout &lt;&lt; " M " &lt;&lt; msc; }
+  ~MagicHorse() { cout &lt;&lt; " C " &lt;&lt; msc; }
+  virtual void dispData() { cout &lt;&lt; " G " &lt;&lt; msc; }
+};
+int main() {
+  Animal *ptr = new MagicHorse('U', 'W');
+  ptr -&gt; dispData();
+  delete ptr;
+  return 1;
+}`)}`,
+ answer:`<h5>✅ Odpowiedź: A H U M W G W</h5><table class="tm"><tr><th>krok</th><th>co się dzieje</th><th>wypisze</th></tr><tr><td>new</td><td>konstruktor Animal (najstarsza)</td><td class="state">A</td></tr><tr><td></td><td>Horse('U')</td><td class="state">H U</td></tr><tr><td></td><td>MagicHorse, msc = 'W'</td><td class="state">M W</td></tr><tr><td>dispData</td><td>wirtualna w Animal -&gt; wersja z MagicHorse</td><td class="state">G W</td></tr><tr><td>delete</td><td>destruktor <b>Animal</b> nie jest wirtualny -&gt; wołany tylko ~Animal (pusty)</td><td class="state">nic</td></tr></table><p><strong>Pułapka:</strong> Horse ma <code>virtual ~Horse()</code>, ale przy <code>delete ptr</code> liczy się klasa <strong>wskaźnika</strong> (Animal), a ta ma zwykły destruktor. Więc ani E, ani C się nie pojawią.</p><p class="note">Sprawdzone w g++. Kompilator ostrzega, że to formalnie undefined behavior, ale w praktyce wynik jest taki jak wyżej i tak go się oczekuje.</p>${jump(NT+'#poly','przepis na co wypisze')}`},
+{id:'d4',tag:'CO WYPISZE · EGZAMIN',topic:T3,
+ title:'Co zostanie wyświetlone w wyniku działania poniższego kodu? (MagicMouse)',
+ body:`${src('egzamin 2023 · 1,5 p.')}${cpp(`class Mouse {
+  char msc;
+public:
+  Mouse(char m) : msc(m) { cout &lt;&lt; " A " &lt;&lt; msc; }
+  virtual ~Mouse() { cout &lt;&lt; " B " &lt;&lt; msc; }
+  virtual void dispData() { cout &lt;&lt; " C " &lt;&lt; msc; }
+};
+class MagicMouse : public Mouse {
+  char msc;
+public:
+  MagicMouse(char m1, char m2) : Mouse(m1), msc(m2) { cout &lt;&lt; " D " &lt;&lt; msc; }
+  ~MagicMouse() { cout &lt;&lt; " E " &lt;&lt; msc; }
+  virtual void dispData() { cout &lt;&lt; " F " &lt;&lt; msc; }
+};
+int main() {
+  Mouse *ptr = new MagicMouse('G', 'H');
+  ptr -&gt; dispData();
+  delete ptr;
+}`)}`,
+ answer:`<h5>✅ Odpowiedź: A G D H F H E H B G</h5><table class="tm"><tr><th>krok</th><th>co się dzieje</th><th>wypisze</th></tr><tr><td>new</td><td>Mouse('G')</td><td class="state">A G</td></tr><tr><td></td><td>MagicMouse, msc = 'H'</td><td class="state">D H</td></tr><tr><td>dispData</td><td>wirtualna -&gt; MagicMouse</td><td class="state">F H</td></tr><tr><td>delete</td><td>~Mouse jest <b>wirtualny</b> -&gt; najpierw ~MagicMouse</td><td class="state">E H</td></tr><tr><td></td><td>potem ~Mouse (baza na końcu)</td><td class="state">B G</td></tr></table><p>Każda klasa ma <strong>własne</strong> pole <code>msc</code>: w Mouse siedzi 'G', w MagicMouse 'H'. Funkcja wypisuje pole ze swojej klasy.</p><p class="note">Porównaj z MagicHorse: tu destruktor w klasie wskaźnika jest wirtualny, więc wykonują się oba. Sprawdzone w g++.</p>`},
+{id:'d5',tag:'CO WYPISZE · STARY',topic:T3,
+ title:'Co wyświetli program?',
+ body:`${src('stara poprawka Tyszera')}${cpp(`class tree {
+public:
+  virtual void test() { cout &lt;&lt; "Tree" &lt;&lt; endl; }
+};
+class oak : public tree {
+public:
+  void test() { cout &lt;&lt; "Oak" &lt;&lt; endl; }
+};
+int main() {
+  oak object;
+  object.tree::test();
+}`)}`,
+ answer:`<h5>✅ Odpowiedź: Tree</h5><p>Operator zakresu <code>tree::</code> wskazuje konkretną wersję funkcji, więc mechanizm wirtualny jest pomijany. Bez <code>tree::</code> wypisałoby <strong>Oak</strong>.</p>`},
+{id:'d6',tag:'BŁĄD · EGZAMIN',topic:T3,
+ title:'Co jest powodem błędu kompilacji poniższego programu?',
+ body:`${src('egzamin 04.02.2020 · 1 p.')}${cpp(`class One {
+  int value;
+public:
+  One(int input) : value(input) { cout &lt;&lt; "A" &lt;&lt; input; }
+  virtual void dig() = 0;
+};
+class Two : public One {
+public:
+  Two(int input) : One(input) { cout &lt;&lt; "C" &lt;&lt; input; }
+  virtual void dig() { cout &lt;&lt; "Digging Two" &lt;&lt; endl; }
+};
+int main() {
+  One example(5);
+  return 0;
+}`)}`,
+ answer:`<h5>✅ Odpowiedź (z klucza)</h5><p>Nie można stworzyć obiektu <code>example</code> klasy One, bo <strong>One jest klasą abstrakcyjną</strong> (ma czystą funkcję wirtualną <code>dig() = 0</code>).</p><p class="note">Wskaźnik już można: <code>One *p = new Two(5);</code> jest poprawne i wypisze A5C5.</p>`},
+{id:'d7',tag:'CO WYPISZE',topic:T3,
+ title:'Co wypisze p->start() z virtual w Vehicle i bez virtual?',
+ body:`${cpp(`class Vehicle {
+public: void start() { cout &lt;&lt; "Starting a vehicle."; }
+};
+class Car : public Vehicle {
+public: void start() { cout &lt;&lt; "Starting a car."; }
+};
+Vehicle *p = new Car;
+p -&gt; start();`)}`,
+ answer:`<h5>✅ Odpowiedź</h5><p><strong>Bez virtual:</strong> "Starting a vehicle." - funkcję wybiera typ <strong>wskaźnika</strong> (Vehicle*), już przy kompilacji.<br><strong>Z <code>virtual void start()</code> w Vehicle:</strong> "Starting a car." - funkcję wybiera typ <strong>obiektu</strong>, w czasie działania.</p><p class="note">virtual wystarczy w bazie. W Car można dopisać <code>override</code>, a <code>final</code> zablokuje dalsze przesłanianie.</p>`},
+{id:'d8',tag:'KOLEJNOŚĆ',topic:T3,
+ title:'W jakiej kolejności wołane są konstruktory i destruktory przy klasach A <- B <- C (C dziedziczy po B, B po A)?',
+ body:`<p>Tworzysz <code>C obj;</code> i obiekt wychodzi z zakresu.</p>`,
+ answer:`<h5>✅ Odpowiedź</h5><p>Konstruktory: <strong>A, B, C</strong> (od klasy najstarszej w hierarchii).<br>Destruktory: <strong>C, B, A</strong> (odwrotnie).</p><p class="note">Przy <code>A *p = new C; delete p;</code> to samo, ale tylko jeśli destruktor A jest wirtualny. Inaczej wykona się sam ~A.</p>`},
+
+/* ================= T4 ================= */
+{id:'w1',tag:'TEORIA · EGZAMIN',topic:T4,
+ title:'Co przechowuje zmienna wskaźnikowa w języku C++?',
+ body:`${src('egzamin 05.02.2025 · 0,5 p.')}`,
+ answer:`<h5>✅ Odpowiedź: adres obiektu danego typu</h5><p>Adres daje operator <code>&amp;</code>, a wartość spod adresu odczytuje <code>*</code>:</p>${cpp(`int number {3};
+int *Pointer = &amp;number;
+int value = *Pointer;      <span class="cm">// 3</span>`)}`},
+{id:'w2',tag:'ZAZNACZ · STARY',topic:T4,
+ title:'Wskaźnik na liczbę całkowitą o wartości 7. Które zapisy są poprawne? Uzasadnij pozostałe.',
+ body:`${src('stara poprawka Tyszera')}${cpp(`a) int *ptr = 7;
+b) int *ptr; *ptr = 7;
+c) int *ptr = new int; *ptr = 7;
+d) int *ptr = new int; ptr = 7;`)}`,
+ answer:`<h5>✅ Odpowiedź: tylko c</h5><p><strong>a)</strong> błąd kompilacji: liczba 7 to nie adres.<br><strong>b)</strong> kompiluje się, ale <code>ptr</code> nie jest zainicjowany, więc 7 trafia pod losowy adres (undefined behavior).<br><strong>c)</strong> poprawnie: <code>new int</code> daje miejsce, potem wpisujesz 7.<br><strong>d)</strong> błąd kompilacji: do wskaźnika przypisujesz int (zapomniane <code>*</code>).</p>`},
+{id:'w3',tag:'DEKLARACJA',topic:T4,
+ title:'Czym różnią się int (*fun_Ptr)(double, int); i int *fun_Ptr(double, int);?',
+ body:`<p>"Częsty błąd" ze slajdu.</p>`,
+ answer:`<h5>✅ Odpowiedź</h5><p><code>int (*fun_Ptr)(double, int);</code> - <strong>wskaźnik na funkcję</strong> przyjmującą (double, int) i zwracającą int.<br><code>int *fun_Ptr(double, int);</code> - deklaracja <strong>funkcji</strong> zwracającej <code>int*</code>.</p><p>Nawias zmienia kolejność czytania. Użycie: <code>fun_Ptr = my_function; (*fun_Ptr)(25.0, 3);</code> (nazwa funkcji to jej adres).</p>`},
+{id:'w4',tag:'WYCIEK PAMIĘCI',topic:T4,
+ title:'Gdzie jest wyciek pamięci i jak go usunąć wskaźnikiem inteligentnym?',
+ body:`${cpp(`void function () {
+  int *ptr = new int(58);
+  int value = 90;
+  if (value == 90) return;
+  delete ptr;
+}`)}`,
+ answer:`<h5>✅ Odpowiedź</h5><p>Wcześniejszy <code>return</code> omija <code>delete</code>, więc <code>int(58)</code> nigdy nie jest usuwany (więcej new niż delete = wyciek).</p>${cpp(`void function () {
+  unique_ptr &lt;int&gt; ptr(new int(58));
+  int value = 90;
+  if (value == 90) return;   <span class="cm">// int(58) usuwany automatycznie</span>
+}`)}<p class="note">Albo <code>auto ptr = make_unique&lt;int&gt;(58);</code></p>`},
+{id:'w5',tag:'CZY SIĘ SKOMPILUJE',topic:T4,
+ title:'Które linie z unique_ptr się nie skompilują i dlaczego?',
+ body:`${cpp(`void Compute(unique_ptr &lt;int[]&gt; p) { }
+unique_ptr &lt;int[]&gt; p1 = make_unique &lt;int[]&gt;(135);
+unique_ptr &lt;int[]&gt; p2 = p1;        <span class="cm">// (1)</span>
+Compute(p1);                       <span class="cm">// (2)</span>
+unique_ptr &lt;int&gt; p3(new int(58));
+unique_ptr &lt;int&gt; p4(move(p3));     <span class="cm">// (3)</span>`)}`,
+ answer:`<h5>✅ Odpowiedź: (1) i (2) to błędy, (3) OK</h5><p><code>unique_ptr</code> jest <strong>jedynym właścicielem</strong>: prawo własności można <strong>przekazać</strong>, ale nie współdzielić, więc kopiowanie jest zabronione. (1) to kopia, (2) przekazanie przez wartość też robi kopię. (3) przenosi własność przez <code>move</code>; potem <code>p3</code> jest pusty.</p>`},
+{id:'w6',tag:'ZAKLESZCZENIE',topic:T4,
+ title:'Dlaczego obiekty a i b nie zostaną usunięte po wyjściu z funkcji? Jak to naprawić?',
+ body:`${cpp(`class B;
+class A { public: shared_ptr &lt;B&gt; ptr_b; };
+class B { public: shared_ptr &lt;A&gt; ptr_a; };
+void function() {
+  auto a = make_shared &lt;A&gt;();
+  auto b = make_shared &lt;B&gt;();
+  a -&gt; ptr_b = b;
+  b -&gt; ptr_a = a;
+}`)}`,
+ answer:`<h5>✅ Odpowiedź</h5><p>Każdy obiekt ma licznik referencji = 2 (zmienna lokalna + wskaźnik w drugim obiekcie). Po wyjściu z funkcji znikają zmienne lokalne, liczniki spadają do 1, nie do 0, więc nic się nie usuwa. To <strong>zakleszczenie</strong> (cykl).</p><p>Naprawa: jedna strona trzyma <strong>weak_ptr</strong>, który nie podbija licznika:</p>${cpp(`class B { public: weak_ptr &lt;A&gt; ptr_a; };`)}`},
+{id:'w7',tag:'TABLICA 2D',topic:T4,
+ title:'Zaalokuj dynamicznie tablicę 2D double o wymiarach size1 x size2 i poprawnie ją usuń.',
+ body:`<p>Na slajdzie jest tylko alokacja. Dopisz zwalnianie.</p>`,
+ answer:`<h5>✅ Odpowiedź</h5>${cpp(`double **m = new double *[size1];
+for (int i = 0; i &lt; size1; i++)
+  m[i] = new double[size2];
+
+for (int i = 0; i &lt; size1; i++)
+  delete [] m[i];          <span class="cm">// najpierw wiersze</span>
+delete [] m;               <span class="cm">// potem tablica wskaźników</span>`)}<p>Ile <code>new</code>, tyle <code>delete</code>, i przy tablicach zawsze <code>delete []</code>. Odwrotna kolejność (najpierw <code>m</code>) gubi adresy wierszy.</p>`},
+
+/* ================= T5 ================= */
+{id:'v1',tag:'WZORZEC',topic:T5,
+ title:'Zdefiniuj poza klasą konstruktor wzorca Object, który ustawia leftNode i rightNode.',
+ body:`${cpp(`template &lt;class Item&gt;
+class Object {
+  Item leftNode;
+  Item rightNode;
+public:
+  Object(Item, Item);
+};`)}`,
+ answer:`<h5>✅ Odpowiedź</h5>${cpp(`template &lt;class Item&gt; Object &lt;Item&gt; ::
+Object(Item left, Item right) : leftNode(left), rightNode(right) { }
+
+Object &lt;int&gt; integerPair(3, 5);`)}<p>Poza klasą za każdym razem <code>template &lt;class Item&gt;</code> i nazwa z parametrem: <code>Object&lt;Item&gt;::</code>.</p>`},
+{id:'v2',tag:'OPERATOR [ ]',topic:T5,
+ title:'Dlaczego operator [ ] w pojemniku Vector zwraca T& , a nie T?',
+ body:`${cpp(`template &lt;class T&gt;
+T &amp; Vector &lt;T&gt; :: operator [] (unsigned int index) const {
+  assert(index &lt; size);
+  return data[index];
+}`)}`,
+ answer:`<h5>✅ Odpowiedź</h5><p>Żeby element mógł stać <strong>po lewej stronie przypisania</strong>: <code>v[3] = 5;</code> albo <code>counts[c]++;</code>. Zwrócenie T dałoby kopię, a zmiana kopii nie zmienia tablicy.</p><p class="note"><code>[ ]</code> musi być składnikiem klasy (tak samo <code>=</code>, <code>( )</code>, <code>-&gt;</code>). <code>assert</code> pilnuje zakresu indeksu.</p>`},
+{id:'v3',tag:'BOUNDEDVECTOR',topic:T5,
+ title:'Po co w BoundedVector::operator[] jest zapis Vector<T>::operator[]? Ile elementów ma counts(\'a\', \'z\', zero)?',
+ body:`${cpp(`template &lt;class T&gt;
+T &amp; BoundedVector &lt;T&gt; :: operator [] (int index) const {
+  return Vector&lt;T&gt; :: operator [] (index - lowBound);
+}
+BoundedVector &lt;int&gt; counts('a', 'z', zero);`)}`,
+ answer:`<h5>✅ Odpowiedź</h5><p>Bez <code>Vector&lt;T&gt;::</code> wywołałby się <strong>operator [ ] z BoundedVector</strong>, czyli ta sama funkcja, i byłaby nieskończona rekurencja. Kwalifikacja wymusza wersję z klasy bazowej.</p><p><code>counts</code> ma <strong>26 elementów</strong> (highIndex - lowIndex + 1 = 'z' - 'a' + 1). <code>counts['c']</code> to element o indeksie 'c' - 'a' = 2 w Vector.</p><p class="note">Konstruktor bazy <code>Vector&lt;T&gt;(highIndex - lowIndex + 1)</code> i stałe pole <code>lowBound</code> da się ustawić tylko na liście inicjacyjnej.</p>`},
+{id:'v4',tag:'DESTRUKTOR VECTOR',topic:T5,
+ title:'Dlaczego destruktor Vector jest virtual i co robi w środku?',
+ body:`<p>Pola: <code>T *data; unsigned int size;</code></p>`,
+ answer:`<h5>✅ Odpowiedź</h5>${cpp(`template &lt;class T&gt; Vector &lt;T&gt; :: ~Vector() {
+  delete [] data;
+  data = nullptr;     <span class="cm">// zabezpieczenie przy podwójnym usunięciu</span>
+  size = 0;
+}`)}<p><strong>virtual</strong>, bo z Vector dziedziczy np. BoundedVector, a jego obiekty mogą być usuwane przez wskaźnik na klasę bazową. Bez virtual wywołałby się tylko destruktor klasy wskaźnika (jak w zadaniu MagicHorse).</p>`},
+];
+
+
+
+</script>
+<script>
+  // ===== stan aplikacji =====
+  let deck = [];          // aktualna talia (po filtrze + przetasowaniu)
+  let idx = 0;
+  let knowCount = 0, dontknowCount = 0;
+  let missedCards = [];   // karty ocenione jako "nie wiedziałem" w tym przejściu
+  let perCardResult = {}; // id -> 'know'|'dontknow', dla rozbicia tematycznego
+  let selectedTopics = new Set();
+  let topicsOrder = [];
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+
+  function buildTopics(){
+    const counts = {};
+    CARDS.forEach(c=>{ counts[c.topic] = (counts[c.topic]||0)+1; });
+    topicsOrder = Object.keys(counts).sort((a,b)=>counts[b]-counts[a]);
+    selectedTopics = new Set(topicsOrder);
+
+    const grid = document.getElementById('topicGrid');
+    grid.innerHTML = '';
+    topicsOrder.forEach(t=>{
+      const div = document.createElement('div');
+      div.className = 'topic-card checked';
+      div.innerHTML = `<div class="topic-row-inner"><span class="check">✓</span><span class="tname">${t}</span></div><span class="tcount">${counts[t]}</span>`;
+      div.addEventListener('click', ()=>{
+        if(selectedTopics.has(t)){ selectedTopics.delete(t); div.classList.remove('checked'); }
+        else { selectedTopics.add(t); div.classList.add('checked'); }
+        updateSelCount();
+      });
+      grid.appendChild(div);
+    });
+
+    document.getElementById('heroStats').innerHTML =
+      `<span>${CARDS.length} pytań</span><span>${topicsOrder.length} tematów</span><span>losowa kolejność</span><span>self-test</span>`;
+    updateSelCount();
+  }
+
+  function updateSelCount(){
+    const n = CARDS.filter(c=>selectedTopics.has(c.topic)).length;
+    document.getElementById('selCount').textContent = `wybrano: ${n} pytań`;
+    document.getElementById('startBtn').disabled = n===0;
+  }
+
+  document.getElementById('selectAllBtn').addEventListener('click', ()=>{
+    selectedTopics = new Set(topicsOrder);
+    document.querySelectorAll('.topic-card').forEach(d=>d.classList.add('checked'));
+    updateSelCount();
+  });
+  document.getElementById('selectNoneBtn').addEventListener('click', ()=>{
+    selectedTopics.clear();
+    document.querySelectorAll('.topic-card').forEach(d=>d.classList.remove('checked'));
+    updateSelCount();
+  });
+
+  document.getElementById('startBtn').addEventListener('click', ()=>{
+    const pool = CARDS.filter(c=>selectedTopics.has(c.topic));
+    startQuiz(pool);
+  });
+
+  let currentExamName = null;
+
+  function startQuiz(pool, examName){
+    deck = shuffle(pool);
+    idx = 0; knowCount = 0; dontknowCount = 0; missedCards = []; perCardResult = {};
+    currentExamName = examName || null;
+    document.getElementById('setupScreen').style.display = 'none';
+    document.getElementById('resultsScreen').style.display = 'none';
+    document.getElementById('examPaperScreen').style.display = 'none';
+    document.getElementById('quizScreen').style.display = 'block';
+    const banner = document.getElementById('examBanner');
+    if(currentExamName){
+      banner.style.display = 'flex';
+      document.getElementById('ebName').textContent = '📝 ' + currentExamName;
+    } else {
+      banner.style.display = 'none';
+    }
+    renderCard();
+  }
+
+  // ===================== GENERATOR EGZAMINU =====================
+  // Schemat oparty na proporcjach z nadesłanych prawdziwych egzaminów
+  // (komisyjny 11p., poprawkowy 5p., 20.06.2023 9p., egzamin z punktacją 10p.)
+  const EXAM_TEMPLATES = {
+    cpp: {
+      label: 'Część C++ z egzaminu', meta: '4 pytania - tyle bywa z tego wykładu',
+      desc: 'Jak pierwsza strona egzaminu 2023-2025: dziedziczenie, operatory, konstruktory i co wypisze kod.',
+      counts: {'Dziedziczenie i polimorfizm':2, 'Przyjaźń i operatory':1, 'Klasy, konstruktory, destruktor':1}
+    },
+    w1: {
+      label: 'Cały wykład 1', meta: '8 pytań - wszystkie tematy',
+      desc: 'Po jednym lub dwa z każdego tematu, łącznie ze wskaźnikami inteligentnymi i wzorcami.',
+      counts: {'Dziedziczenie i polimorfizm':2, 'Przyjaźń i operatory':2, 'Klasy, konstruktory, destruktor':2, 'Wskaźniki i pamięć':1, 'Wzorce i pojemniki':1}
+    }
+  };
+
+  function buildExamTemplates(){
+    const grid = document.getElementById('examTplGrid');
+    grid.innerHTML = '';
+    Object.entries(EXAM_TEMPLATES).forEach(([key,t])=>{
+      const div = document.createElement('div');
+      div.className = 'exam-tpl';
+      div.innerHTML = `<div class="et-name">${t.label}</div><div class="et-meta">${t.meta}</div><div class="et-desc">${t.desc}</div>`;
+      div.addEventListener('click', ()=>generateExam(key));
+      grid.appendChild(div);
+    });
+  }
+
+  function generateExam(templateKey){
+    const tpl = EXAM_TEMPLATES[templateKey];
+    let examDeck = [];
+    const used = new Set();
+    Object.entries(tpl.counts).forEach(([topic,n])=>{
+      const poolForTopic = shuffle(CARDS.filter(c=>c.topic===topic && !used.has(c.id)));
+      const picked = poolForTopic.slice(0, n);
+      picked.forEach(c=>used.add(c.id));
+      examDeck = examDeck.concat(picked);
+    });
+    const target = Object.values(tpl.counts).reduce((a,b)=>a+b,0);
+    if(examDeck.length < target){
+      const filler = shuffle(CARDS.filter(c=>!used.has(c.id)));
+      examDeck = examDeck.concat(filler.slice(0, target-examDeck.length));
+    }
+    examDeck = shuffle(examDeck);
+    renderExamPaper(examDeck, `Egzamin: ${tpl.label} (${examDeck.length} pytań)`);
+  }
+
+  buildExamTemplates();
+
+  // ===================== ARKUSZ EGZAMINU (wszystkie pytania naraz) =====================
+  function renderExamPaper(examDeck, examName){
+    deck = examDeck;
+    knowCount = 0; dontknowCount = 0; missedCards = []; perCardResult = {};
+    currentExamName = examName;
+
+    document.getElementById('setupScreen').style.display = 'none';
+    document.getElementById('quizScreen').style.display = 'none';
+    document.getElementById('resultsScreen').style.display = 'none';
+    document.getElementById('examPaperScreen').style.display = 'block';
+
+    document.getElementById('epName').textContent = '📝 ' + examName;
+
+    const list = document.getElementById('examQuestionsList');
+    list.innerHTML = '';
+    deck.forEach((c,i)=>{
+      const div = document.createElement('div');
+      div.className = 'exam-q';
+      div.id = 'eq-' + c.id;
+      div.innerHTML = `
+        <div class="eq-num">Pytanie ${i+1} / ${deck.length}</div>
+        <div class="fc-tag">${c.tag}</div>
+        <h3 class="fc-title">${c.title}</h3>
+        <div class="fc-body">${c.body}</div>
+        <div class="eq-reveal-wrap">
+          <button class="reveal-btn-big" onclick="epReveal('${c.id}', this)">▸ Pokaż rozwiązanie</button>
+        </div>
+        <div class="eq-answer" id="eq-answer-${c.id}">
+          <div>${c.answer}</div>
+          <div class="eq-grade-row">
+            <button class="grade-btn dontknow" onclick="epGrade('${c.id}','dontknow')" id="eq-no-${c.id}">✗ Nie wiedziałem</button>
+            <button class="grade-btn know" onclick="epGrade('${c.id}','know')" id="eq-yes-${c.id}">✓ Wiedziałem</button>
+          </div>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+    updateExamProgress();
+    highlightCode();
+    window.scrollTo({top:0, behavior:'instant'});
+  }
+
+  function epReveal(cardId, btn){
+    const ans = document.getElementById('eq-answer-'+cardId);
+    ans.classList.add('show');
+    btn.style.display = 'none';
+    highlightCode();
+  }
+
+  function epGrade(cardId, result){
+    const wasGraded = perCardResult.hasOwnProperty(cardId);
+    if(wasGraded){
+      // cofnij poprzednia ocene z licznikow
+      if(perCardResult[cardId]==='know') knowCount--;
+      else { dontknowCount--; missedCards = missedCards.filter(c=>c.id!==cardId); }
+    }
+    perCardResult[cardId] = result;
+    if(result==='know') knowCount++;
+    else { dontknowCount++; const c = deck.find(d=>d.id===cardId); if(c) missedCards.push(c); }
+
+    const yesBtn = document.getElementById('eq-yes-'+cardId);
+    const noBtn = document.getElementById('eq-no-'+cardId);
+    yesBtn.classList.toggle('active-know', result==='know');
+    noBtn.classList.toggle('active-dontknow', result==='dontknow');
+    document.getElementById('eq-'+cardId).classList.add('graded');
+
+    updateExamProgress();
+  }
+
+  function updateExamProgress(){
+    const graded = Object.keys(perCardResult).length;
+    const total = deck.length;
+    document.getElementById('epProgress').textContent = `${graded} / ${total} ocenione`;
+    document.getElementById('epProgressFill').style.width = (total ? graded/total*100 : 0) + '%';
+  }
+
+  document.getElementById('epFinishBtn').addEventListener('click', ()=>{
+    const graded = Object.keys(perCardResult).length;
+    if(graded < deck.length){
+      if(!confirm(`Oceniłeś ${graded} z ${deck.length} pytań. Nieocenione pytania będą liczone jako „nie wiedziałem". Zakończyć mimo to?`)) return;
+      deck.forEach(c=>{
+        if(!perCardResult.hasOwnProperty(c.id)){
+          perCardResult[c.id] = 'dontknow';
+          dontknowCount++;
+          missedCards.push(c);
+        }
+      });
+    }
+    document.getElementById('examPaperScreen').style.display = 'none';
+    showResults();
+  });
+
+  document.getElementById('epQuitBtn').addEventListener('click', ()=>{
+    if(confirm('Przerwać egzamin? Postęp nie zostanie zapisany.')){
+      currentExamName = null;
+      document.getElementById('examPaperScreen').style.display = 'none';
+      document.getElementById('setupScreen').style.display = 'block';
+    }
+  });
+
+  function renderCard(){
+    const c = deck[idx];
+    document.getElementById('fcTag').textContent = c.tag;
+    document.getElementById('fcTitle').innerHTML = c.title;
+    document.getElementById('fcBody').innerHTML = c.body;
+    document.getElementById('fcAnswer').innerHTML = c.answer;
+    document.getElementById('fcAnswerWrap').classList.remove('show');
+    document.getElementById('revealWrap').style.display = 'block';
+    document.getElementById('progressText').textContent = `fiszka ${idx+1}/${deck.length}`;
+    document.getElementById('progressFill').style.width = (idx/deck.length*100) + '%';
+    document.getElementById('liveKnow').textContent = '✓ ' + knowCount;
+    document.getElementById('liveDontknow').textContent = '✗ ' + dontknowCount;
+    document.getElementById('backCardBtn').style.display = (idx > 0) ? 'inline-flex' : 'none';
+    highlightCode();
+    window.scrollTo({top:0, behavior:'instant'});
+  }
+
+  document.getElementById('revealBtn').addEventListener('click', ()=>{
+    document.getElementById('fcAnswerWrap').classList.add('show');
+    document.getElementById('revealWrap').style.display = 'none';
+    highlightCode();
+  });
+
+  function grade(result){
+    const c = deck[idx];
+    perCardResult[c.id] = result;
+    if(result==='know') knowCount++; else { dontknowCount++; missedCards.push(c); }
+    idx++;
+    if(idx>=deck.length){ showResults(); }
+    else { renderCard(); }
+  }
+  document.getElementById('gradeYes').addEventListener('click', ()=>grade('know'));
+  document.getElementById('gradeNo').addEventListener('click', ()=>grade('dontknow'));
+
+  document.getElementById('backCardBtn').addEventListener('click', ()=>{
+    if(idx <= 0) return;
+    idx--;
+    const c = deck[idx];
+    const prev = perCardResult[c.id];
+    if(prev === 'know'){ knowCount--; }
+    else if(prev === 'dontknow'){ dontknowCount--; missedCards = missedCards.filter(m=>m.id!==c.id); }
+    delete perCardResult[c.id];
+    renderCard();
+  });
+
+  document.getElementById('quitBtn').addEventListener('click', ()=>{
+    if(idx===0 || confirm('Przerwać test? Postęp nie zostanie zapisany.')){
+      currentExamName = null;
+      document.getElementById('quizScreen').style.display = 'none';
+      document.getElementById('examPaperScreen').style.display = 'none';
+      document.getElementById('setupScreen').style.display = 'block';
+    }
+  });
+
+  function showResults(){
+    document.getElementById('quizScreen').style.display = 'none';
+    document.getElementById('examPaperScreen').style.display = 'none';
+    document.getElementById('resultsScreen').style.display = 'block';
+    const total = knowCount + dontknowCount;
+    const pct = total ? Math.round(knowCount/total*100) : 0;
+
+    document.getElementById('rsKnow').textContent = knowCount;
+    document.getElementById('rsDontknow').textContent = dontknowCount;
+    document.getElementById('rsTotal').textContent = total;
+    document.getElementById('resultPct').textContent = pct + '%';
+
+    const circumference = 2*Math.PI*70;
+    const ring = document.getElementById('ringFill');
+    ring.setAttribute('stroke-dasharray', circumference);
+    const offset = circumference * (1 - pct/100);
+    ring.style.transition = 'stroke-dashoffset 1s ease';
+    setTimeout(()=>{ ring.setAttribute('stroke-dashoffset', offset); }, 50);
+    ring.setAttribute('stroke', pct>=80 ? '#5fb86a' : pct>=50 ? '#f2a93b' : '#e0584a');
+
+    let headline, sub;
+    if(currentExamName){
+      const passed = pct>=50;
+      headline = passed ? `Zaliczone - ${pct}% ✓` : `Niezaliczone - ${pct}%`;
+      sub = passed
+        ? `${currentExamName}. Próg zaliczenia to umownie 50% - przekroczony. Sprawdź rozbicie tematyczne poniżej, żeby dobić słabsze miejsca.`
+        : `${currentExamName}. Próg zaliczenia to umownie 50% - nie przekroczony tym razem. Zobacz rozbicie tematyczne, wróć do najsłabszych tematów i spróbuj ponownie.`;
+      ring.setAttribute('stroke', passed ? '#5fb86a' : '#e0584a');
+    }
+    else if(pct>=90){ headline='Solidnie 🔥'; sub='Tak trzymać - to wygląda na realną gotowość.'; }
+    else if(pct>=75){ headline='Dobrze'; sub='Większość siedzi. Dobij brakujące tematy poniżej.'; }
+    else if(pct>=50){ headline='W połowie drogi'; sub='Jest na czym budować - wróć do błędów i powtórz.'; }
+    else { headline='Jeszcze trochę pracy'; sub='To dobry moment, żeby wrócić do teorii w tych tematach.'; }
+    document.getElementById('resultHeadline').textContent = headline;
+    document.getElementById('resultSub').textContent = sub;
+
+    // rozbicie tematyczne
+    const byTopic = {};
+    deck.forEach(c=>{
+      if(!byTopic[c.topic]) byTopic[c.topic] = {know:0,total:0};
+      byTopic[c.topic].total++;
+      if(perCardResult[c.id]==='know') byTopic[c.topic].know++;
+    });
+    const tb = document.getElementById('tbRows');
+    tb.innerHTML = '';
+    Object.keys(byTopic).sort((a,b)=>(byTopic[a].know/byTopic[a].total)-(byTopic[b].know/byTopic[b].total)).forEach(t=>{
+      const {know,total} = byTopic[t];
+      const p = total ? (know/total*100) : 0;
+      const row = document.createElement('div');
+      row.className = 'tb-row';
+      row.innerHTML = `<span class="tb-name">${t}</span><div class="tb-bar"><div class="tb-fill" style="width:${p}%"></div></div><span class="tb-frac">${know}/${total}</span>`;
+      tb.appendChild(row);
+    });
+
+    document.getElementById('retryMissedBtn').disabled = missedCards.length===0;
+    document.getElementById('retryMissedBtn').textContent = missedCards.length
+      ? `↻ Powtórz tylko błędy (${missedCards.length})` : '↻ Brak błędów do powtórki';
+  }
+
+  document.getElementById('retryMissedBtn').addEventListener('click', ()=>{
+    if(missedCards.length) startQuiz(missedCards);
+  });
+  document.getElementById('retryAllBtn').addEventListener('click', ()=>{
+    currentExamName = null;
+    document.getElementById('resultsScreen').style.display = 'none';
+    document.getElementById('setupScreen').style.display = 'block';
+  });
+
+  // ===== syntax highlighter (taki sam jak w głównej notatce) =====
+  function highlightCode(){
+    const KEYWORDS = ["int","double","float","char","bool","void","auto","string","unsigned","signed","short","long","size_t","const","static","if","else","for","while","do","switch","case","break","continue","default","return","goto","new","delete","this","virtual","friend","template","typename","class","struct","public","private","protected","enum","namespace","using","true","false","nullptr","sizeof","typedef","operator","explicit","mutable","inline","and","or","not"];
+    const re = new RegExp(
+      "(//[^\\n]*)" +
+      "|(\"(?:[^\"\\\\]|\\\\.)*\")" +
+      "|\\b(" + KEYWORDS.join("|") + ")\\b" +
+      "|\\b(\\d+\\.?\\d*)\\b",
+      "g"
+    );
+    document.querySelectorAll("pre.cpp code").forEach(block=>{
+      if(block.dataset.hl) return;
+      const raw = block.textContent.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const highlighted = raw.replace(re, function(m, cm, ds, kw, num){
+        if (cm) return '<span class="cm">'+cm+'</span>';
+        if (ds) return '<span class="st">'+ds+'</span>';
+        if (kw) return '<span class="kw">'+kw+'</span>';
+        if (num) return '<span class="nm">'+num+'</span>';
+        return m;
+      });
+      block.innerHTML = highlighted;
+      block.dataset.hl = '1';
+    });
+  }
+
+  // init
+  buildTopics();
+</script>
+</body>
+</html>

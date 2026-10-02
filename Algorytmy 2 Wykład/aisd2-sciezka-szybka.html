@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AiSD2 - szybka ściągawka</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{font-feature-settings:"calt" 0,"liga" 0}
+:root{
+  --bg:#0a0e12;--panel:#11171d;--panel2:#0d1217;--line:#1e2a32;--line2:#26343e;
+  --text:#e8eef1;--dim:#7c8d96;--dim2:#3d4f59;
+  --cls:#4a9fe0;--ctor:#5fb86a;--fr:#e05fc8;--op:#f2a93b;--inh:#a78bfa;
+  --poly:#e07c4a;--ptr:#7dd3fc;--copy:#2dd4bf;--smart:#caa24a;--tpl:#5470d6;--sort:#f2a93b;
+  color-scheme:dark;
+  --disp:'Space Grotesk',sans-serif;--body:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+
+/* nav */
+.topnav{background:rgba(10,14,18,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:100;padding:0}
+.topnav-inner{max-width:1100px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.topnav a{font-family:var(--mono);font-size:.68rem;font-weight:600;color:var(--dim);text-decoration:none;
+  padding:5px 10px;border-radius:6px;border:1px solid var(--line2);transition:all .15s;white-space:nowrap}
+.topnav a:hover,.topnav a.active{color:var(--text);border-color:var(--text);background:var(--panel)}
+.topnav .spacer{flex:1}
+.topnav a.home{color:var(--dim2);border-color:transparent}
+.topnav a.home:hover{color:var(--dim);border-color:var(--line2)}
+
+/* layout */
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px 60px}
+h1{font-family:var(--disp);font-size:clamp(1.6rem,3.5vw,2.3rem);font-weight:700;letter-spacing:-.015em;
+  padding:30px 0 8px}
+h1 span{color:var(--dim2)}
+.lede{color:var(--dim);font-size:.92rem;padding-bottom:24px;border-bottom:1px solid var(--line);margin-bottom:28px}
+
+/* sections */
+section{margin-bottom:32px}
+.sec-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.sec-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+h2{font-family:var(--disp);font-size:1.15rem;font-weight:600}
+
+/* topic grid - 2 col */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:700px){.grid2,.grid3{grid-template-columns:1fr}}
+
+/* card */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;
+  border-left:3px solid var(--line2)}
+
+/* tables */
+table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.78rem}
+th{text-align:left;padding:7px 10px;background:var(--panel2);color:var(--dim);font-weight:600;
+  font-size:.65rem;text-transform:uppercase;letter-spacing:.04em}
+td{padding:7px 10px;border-top:1px solid var(--line);vertical-align:middle}
+tr:hover td{background:var(--panel2)}
+table.center td,table.center th{text-align:center}
+
+/* formula */
+.F{font-family:var(--mono);font-size:.88rem;background:var(--panel2);border:1px solid var(--line2);
+  border-radius:8px;padding:9px 13px;margin:5px 0;color:var(--text);line-height:1.8}
+.F .hl{font-weight:700}
+.F .dim{color:var(--dim)}
+
+/* algo step blocks */
+.steps{margin-top:8px}
+.step{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--line)}
+.step:last-child{border-bottom:none}
+.step .n{font-family:var(--mono);font-size:.7rem;font-weight:700;width:20px;height:20px;border-radius:5px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step p{font-size:.84rem;color:var(--dim)}
+.step p strong{color:var(--text);font-weight:600}
+.step p code{font-family:var(--mono);font-size:.83em;background:var(--panel2);border:1px solid var(--line2);
+  border-radius:4px;padding:0 5px;color:#c9e3f5}
+
+/* sort algo card */
+.sort-row{display:grid;grid-template-columns:1fr 2fr;gap:0;background:var(--panel);
+  border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:8px}
+.sort-name{padding:12px 14px;font-family:var(--disp);font-weight:600;font-size:.9rem;
+  display:flex;align-items:flex-start;justify-content:space-between;flex-direction:column;gap:4px;
+  border-right:1px solid var(--line)}
+.sort-name .tag{font-family:var(--mono);font-size:.62rem;font-weight:700;padding:2px 7px;
+  border-radius:999px;white-space:nowrap}
+.sort-body{padding:12px 14px}
+.sort-body .desc{font-size:.83rem;color:var(--dim);margin-bottom:6px}
+.sort-body .desc strong{color:var(--text);font-weight:600}
+.sort-body .compl{font-family:var(--mono);font-size:.7rem;color:var(--dim2);display:flex;gap:8px;flex-wrap:wrap}
+.sort-body .compl span{background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:2px 7px}
+.sort-body .compl span b{color:var(--text)}
+
+/* bit register */
+.bitreg{display:flex;gap:3px;flex-wrap:wrap;margin:8px 0}
+.bitreg .b{font-family:var(--mono);font-size:.72rem;font-weight:700;width:34px;height:34px;
+  border-radius:6px;background:var(--panel2);border:1px solid var(--line2);
+  display:flex;align-items:center;justify-content:center;color:var(--dim)}
+.bitreg .b.s{border-color:var(--bits);color:var(--bits)}
+.bitreg .b.e{border-color:var(--ieee);color:var(--ieee)}
+.bitreg .b.m{border-color:var(--search);color:var(--search)}
+.bitreg-labels{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:3px}
+.bitreg-labels span{font-family:var(--mono);font-size:.58rem;color:var(--dim2);width:34px;text-align:center}
+
+/* pill badges */
+.pill{display:inline-block;font-family:var(--mono);font-size:.7rem;font-weight:700;padding:3px 9px;
+  border-radius:999px;margin:2px}
+
+.tag-good{background:rgba(95,184,106,.15);color:#5fb86a}
+.tag-bad{background:rgba(224,88,74,.15);color:#e0584a}
+.tag-med{background:rgba(242,169,59,.15);color:#f2a93b}
+
+/* link do deep-dive w naglowku sekcji */
+.sec-head .dd{margin-left:auto;font-family:var(--mono);font-size:.64rem;font-weight:600;color:var(--dim);
+  text-decoration:none;padding:4px 9px;border:1px solid var(--line2);border-radius:6px;white-space:nowrap}
+.sec-head .dd:hover{color:var(--text);border-color:var(--text)}
+.sec-head .dd + .dd{margin-left:6px}
+.new{font-family:var(--mono);font-size:.56rem;font-weight:700;color:#0a0e12;background:var(--sort);
+  border-radius:4px;padding:1px 5px;margin-left:6px;vertical-align:middle}
+.card p.t{font-size:.82rem;font-weight:600;margin-bottom:8px}
+.card p.d{font-size:.78rem;color:var(--dim);margin-top:6px}
+.card p.d strong{color:var(--text);font-weight:600}
+code{font-family:var(--mono);font-size:.85em;background:var(--panel2);border:1px solid var(--line2);border-radius:4px;padding:0 5px;color:#c9e3f5}
+td code{border:none;background:none;padding:0}
+.bk{font-family:var(--mono);font-size:.72rem;background:var(--panel2);border:1px solid var(--line2);border-radius:5px;padding:1px 6px;white-space:nowrap}
+.lvl{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin:4px 0}
+.lvl .l{font-family:var(--mono);font-size:.62rem;color:var(--dim2);min-width:62px}
+.warn{color:#e0584a;font-weight:600}
+.kol{display:inline-block;font-family:var(--mono);font-size:.6rem;font-weight:700;color:#e07c4a;border:1px solid rgba(224,124,74,.5);background:rgba(224,124,74,.08);border-radius:999px;padding:2px 8px;margin-left:8px;white-space:nowrap}
+pre.cpp{font-family:var(--mono);font-size:.76rem;line-height:1.55;background:var(--panel2);border:1px solid var(--line2);border-radius:8px;padding:10px 12px;margin:8px 0;overflow-x:auto;color:#c9e3f5;white-space:pre}
+pre.cpp .c{color:var(--dim)}
+.card ul{padding-left:18px;font-size:.82rem;color:var(--dim);display:grid;gap:3px}
+.card ul strong,.card ul b{color:var(--text)}
+.lecture{font-family:var(--mono);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--copy);margin:10px 0 4px;font-weight:700}
+.lecture-sub{color:var(--dim);font-size:.85rem;margin-bottom:22px}
+.mb{margin-bottom:10px}
+.grid2>*,.grid3>*,.card{min-width:0}
+.sec-head{flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a href="#klasy">Klasy</a>
+    <a href="#ctor">Konstruktor / destruktor</a>
+    <a href="#konw">Konwersje</a>
+    <a href="#friend">Przyjaźń</a>
+    <a href="#oper">Operatory</a>
+    <a href="#inh">Dziedziczenie</a>
+    <a href="#poly">Polimorfizm</a>
+    <a href="#ptr">Wskaźniki</a>
+    <a href="#copy">Kopiowanie / przenoszenie</a>
+    <a href="#smart">Smart pointery</a>
+    <a href="#tpl">Wzorce i pojemniki</a>
+    <span class="spacer"></span>
+    <a href="aisd2-fiszki.html">🎯 Fiszki</a>
+  </div>
+</nav>
+
+<div class="wrap">
+<h1>AiSD2 <span>- szybka ściągawka</span></h1>
+<p class="lede">Notatka idzie kolejnością slajdów Tyszera. Egzamin to 15 pkt na kartce (3,0 od 7,5 pkt) i mniej więcej <strong>co trzecie pytanie jest z tej części o C++</strong>: co wypisze kod z dziedziczeniem, uzupełnij konstruktor kopiujący, prawda/fałsz o operatorach i destruktorze. Znaczek <span class="kol" style="margin:0">egzamin</span> pokazuje, które rzeczy wracały na egzaminach 2020-2025. Pytania są w fiszkach.</p>
+
+<p class="lecture">Wykład 1 · slajdy ASD_wyklad-2-1 (programowanie obiektowe)</p>
+<p class="lecture-sub">Klasy, konstruktory, przyjaźń, przeładowanie operatorów, dziedziczenie, polimorfizm, wskaźniki, konstruktor kopiujący i przenoszący, inteligentne wskaźniki, wzorce klas i pojemnik Vector.</p>
+
+<!-- KLASY -->
+<section id="klasy">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--cls)"></div><h2>Klasy</h2></div>
+  <div class="grid2">
+    <div class="card" style="border-color:var(--cls)">
+      <p class="t">Sekcje dostępu</p>
+      <table>
+        <tr><th>sekcja</th><th>kto ma dostęp</th></tr>
+        <tr><td><code>private</code></td><td>tylko funkcje tej klasy (i przyjaciele); <b>domyślna</b> w <code>class</code></td></tr>
+        <tr><td><code>protected</code></td><td>jak private + klasy pochodne ("only my family")</td></tr>
+        <tr><td><code>public</code></td><td>wszyscy, przez <code>obiekt.składnik</code></td></tr>
+      </table>
+      <p class="d">Typowy błąd ze slajdu: <code>int nr = myGirlFriend.houseNumber;</code> - <code>houseNumber</code> jest prywatne, trzeba przez <code>getNumber()</code>.</p>
+    </div>
+    <div class="card" style="border-color:var(--cls)">
+      <p class="t">Kilka uwag</p>
+      <ul>
+        <li><b>Deklaracja klasy nie tworzy obiektów</b>, tylko typ.</li>
+        <li><code>static const int</code> - składnik wspólny dla wszystkich obiektów.</li>
+        <li>Funkcje składowe są zwykle w <b>jednej kopii</b> dla wszystkich obiektów.</li>
+        <li>Funkcja zdefiniowana w ciele klasy jest <b>inline</b>. Poza klasą: <code>void Address::display(){...}</code>, <code>::</code> to operator zakresu.</li>
+        <li><code>int getNumber() const</code> - <b>const</b> po nawiasie: funkcja nie zmienia pól obiektu (chyba że są <code>mutable</code>).</li>
+        <li>Klasę można zadeklarować nawet wewnątrz funkcji.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- KONSTRUKTOR -->
+<section id="ctor">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--ctor)"></div><h2>Konstruktor i destruktor</h2><span class="kol">egzamin 2025 · destruktor</span></div>
+  <div class="grid2">
+    <div class="card" style="border-color:var(--ctor)">
+      <p class="t">Konstruktor</p>
+      <ul>
+        <li>Inicjuje składniki. Najlepiej przez <b>listę inicjacyjną</b>: <code>Circle(double r) : radius(r) {}</code></li>
+        <li>Można mieć wiele konstruktorów (<b>przeładowanie</b>). W klasie jest zawsze co najmniej <b>konstruktor domniemany</b>.</li>
+        <li>Pole można zainicjować w deklaracji - tę wartość weźmie konstruktor domniemany.</li>
+        <li>Pole będące <b>obiektem innej klasy</b> inicjujesz wywołaniem jego konstruktora <b>na liście inicjacyjnej</b> (Cylinder i Circle niżej).</li>
+        <li><b>Konstruktor delegujący</b> (C++11): wywołuje inny konstruktor tej samej klasy na liście inicjacyjnej.</li>
+      </ul>
+<pre class="cpp">class Cylinder {
+  double height; Circle base;     <span class="c">// obiekt klasy Circle</span>
+public:
+  Cylinder(double h, double r) : height(h), base(r) {}
+  double volume() {return height * base.area();}
+};
+Cylinder column(10,20);           <span class="c">// albo column{10,20}</span></pre>
+      <p class="d"><code>Circle</code> nie ma konstruktora bez argumentów, więc <code>base</code> <strong>musi</strong> być na liście inicjacyjnej. Przypisanie w ciele konstruktora się nie skompiluje.</p>
+    </div>
+    <div class="card" style="border-color:var(--ctor)">
+      <p class="t">Destruktor <code>~Address()</code></p>
+      <table>
+        <tr><th>stwierdzenie</th><th></th></tr>
+        <tr><td>wywoływany automatycznie, gdy obiekt wychodzi z zakresu</td><td class="tag-good">prawda</td></tr>
+        <tr><td>nie ma parametrów, więc <b>nie może być przeładowany</b></td><td class="tag-good">prawda</td></tr>
+        <tr><td>przydaje się do zwolnienia <b>dodatkowej</b> pamięci, którą obiekt sam zarezerwował (<code>new</code>)</td><td class="tag-good">prawda</td></tr>
+        <tr><td>likwiduje obiekt / zwalnia pamięć zajmowaną przez obiekt</td><td class="tag-bad">fałsz</td></tr>
+        <tr><td>może przyjmować argumenty domyślne</td><td class="tag-bad">fałsz</td></tr>
+        <tr><td>można go wywołać jawnie</td><td class="tag-good">prawda (rzadko)</td></tr>
+      </table>
+      <p class="d">Tyszer powtarza to dwa razy na slajdach: <strong>destruktor nie likwiduje obiektu</strong>, tylko wykonuje czynności przed jego usunięciem.</p>
+      <p class="t" style="margin-top:12px">Kolejność</p>
+      <p class="d" style="margin-top:0">Tworzenie: konstruktory <strong>od klasy najstarszej</strong> w hierarchii (baza -&gt; pochodna). Usuwanie: destruktory <strong>odwrotnie</strong> (pochodna -&gt; baza).</p>
+    </div>
+  </div>
+</section>
+
+<!-- KONWERSJE -->
+<section id="konw">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--ctor)"></div><h2>Konwersje: konstruktor jako konwerter i funkcja konwertująca</h2></div>
+  <div class="grid2">
+    <div class="card" style="border-color:var(--ctor)">
+      <p class="t">Obcy typ -&gt; moja klasa: konstruktor</p>
+<pre class="cpp">Complex (double r = 0.0, double i = 0.0) : re(r), im(i) {}
+result = cSum(argument, 2.5);     <span class="c">// OK: 2.5 -&gt; Complex(2.5, 0)</span></pre>
+      <p class="d">Dzięki <strong>argumentom domniemanym</strong> konstruktor da się wywołać z jednym <code>double</code>, więc działa jak konwersja <code>double -&gt; Complex</code>. Bez nich (<code>Complex(double r, double i)</code>) wywołanie <code>cSum(Z1, 1.7)</code> to błąd i trzeba by pisać osobne wersje <code>cSum(Complex, double)</code>, <code>cSum(double, Complex)</code>...</p>
+    </div>
+    <div class="card" style="border-color:var(--ctor)">
+      <p class="t">Moja klasa -&gt; obcy typ: funkcja konwertująca</p>
+<pre class="cpp">operator int () {     <span class="c">// bez argumentów i bez typu wyniku</span>
+  return int(re);     <span class="c">// część rzeczywista jako int</span>
+}</pre>
+      <p class="d">Nie ma argumentów, więc <strong>nie da się jej przeładować</strong>. Typ wyniku wynika z nazwy (<code>int</code>).</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRZYJAŹŃ -->
+<section id="friend">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--fr)"></div><h2>Funkcje zaprzyjaźnione</h2><span class="kol">egzamin 2024 · uzupełnij friend</span></div>
+  <div class="grid2">
+    <div class="card" style="border-color:var(--fr)">
+<pre class="cpp">class B;                          <span class="c">// deklaracja zapowiadająca</span>
+class A { public: int reader(B); };
+class B {
+  int number;                     <span class="c">// prywatne</span>
+  friend int A::reader(B);        <span class="c">// funkcja z klasy A</span>
+};
+int A::reader(B object){ return object.number; }</pre>
+      <p class="d">Przyjaciel ma dostęp do <strong>private i protected</strong>, ale <strong>nie jest składnikiem</strong> klasy. <code>friend</code> wpisuje się w klasie, która <strong>udostępnia</strong> dane (tu B).</p>
+    </div>
+    <div class="card" style="border-color:var(--fr)">
+      <ul>
+        <li>Klasa B może zaprzyjaźnić się ze <b>wszystkimi funkcjami klasy A</b> (<code>friend class A;</code>) - wtedy A jest przyjacielem B.</li>
+        <li><b>Przyjaciel mojego przyjaciela NIE jest moim przyjacielem</b> (przyjaźń nie jest przechodnia).</li>
+        <li><b>Przyjaźń nie jest dziedziczna</b>: przyjaciel klasy bazowej nie ma dostępu do chronionych składników klasy pochodnej.</li>
+        <li>Typowe użycie: <code>friend Complex operator+(Complex, Complex);</code> - operator spoza klasy, który czyta prywatne <code>re</code>, <code>im</code>.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- OPERATORY -->
+<section id="oper">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--op)"></div><h2>Przeładowanie operatorów</h2><span class="kol">egzamin 2023, 2024, 2025 · co roku</span></div>
+  <div class="grid2">
+    <div class="card" style="border-color:var(--op)">
+      <p class="t">Co wolno, a czego nie</p>
+      <table>
+        <tr><th>stwierdzenie</th><th></th></tr>
+        <tr><td>może nadać operatorowi <b>dowolne znaczenie</b>, łącznie z typem wyniku</td><td class="tag-good">prawda</td></tr>
+        <tr><td>co najmniej jeden argument musi być <b>typu zdefiniowanego w programie</b></td><td class="tag-good">prawda</td></tr>
+        <tr><td>może zmienić <b>priorytet</b></td><td class="tag-bad">fałsz</td></tr>
+        <tr><td>może zmienić <b>reguły łączności</b></td><td class="tag-bad">fałsz</td></tr>
+        <tr><td>może zmienić <b>liczbę argumentów</b></td><td class="tag-bad">fałsz</td></tr>
+        <tr><td>nie może zmienić typu wyniku</td><td class="tag-bad">fałsz</td></tr>
+      </table>
+      <p class="d">Typowy błąd: <code>operator+(int, double)</code> - oba typy wbudowane, nie wolno.</p>
+<pre class="cpp">friend Complex operator+ (Complex, Complex);   <span class="c">// w klasie</span>
+Complex operator+ (Complex a1, Complex a2){
+  return Complex(a1.re + a2.re, a1.im + a2.im);
+}</pre>
+    </div>
+    <div class="card" style="border-color:var(--op)">
+      <p class="t">W klasie czy poza klasą?</p>
+      <ul>
+        <li>Operator <b>zmienia obiekt</b>, na którym działa -&gt; <b>składnik klasy</b>: <code>=</code>, <code>++</code>, <code>+=</code>, <code>*=</code>...</li>
+        <li>Nie zmienia -&gt; <b>poza klasą</b> (zwykle <code>friend</code>): <code>+ - * / &amp; !</code>...</li>
+        <li>Operator - funkcja składowa ma <b>o jeden argument mniej</b> (lewy argument to <code>this</code>).</li>
+        <li><b>Muszą być składowymi:</b> <code>=</code> <code>[ ]</code> <code>( )</code> <code>-&gt;</code></li>
+        <li><b>Predefiniowane dla każdej klasy:</b> <code>=</code>, <code>&amp;</code> (adres), przecinek, <code>new</code>, <code>delete</code>.</li>
+      </ul>
+<pre class="cpp">Complex Complex::operator+ (Complex a1){   <span class="c">// składowa: 1 argument</span>
+  return Complex(re + a1.re, im + a1.im);
+}
+Complex result = second + argument;    <span class="c">// BŁĄD, second to double:</span>
+                                       <span class="c">// double nie ma operator+(Complex)</span></pre>
+      <p class="d">Dlatego <code>+</code> robi się poza klasą: wtedy działa też <code>2.5 + z</code> (konwersja przez konstruktor).</p>
+    </div>
+  </div>
+</section>
+
+<!-- DZIEDZICZENIE -->
+<section id="inh">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--inh)"></div><h2>Dziedziczenie</h2><span class="kol">egzamin 2023, 2025 · tryby dziedziczenia</span></div>
+  <div class="grid2">
+    <div class="card" style="border-color:var(--inh)">
+      <p class="t">Co widzi klasa pochodna (bez przyjaźni)</p>
+      <table class="center">
+        <tr><th>w bazie</th><th>public</th><th>protected</th><th>private</th></tr>
+        <tr><td><code>public</code></td><td>public</td><td>protected</td><td>private</td></tr>
+        <tr><td><code>protected</code></td><td>protected</td><td>protected</td><td>private</td></tr>
+        <tr><td><code>private</code></td><td colspan="3"><span class="warn">niedostępne</span> w każdym trybie</td></tr>
+      </table>
+      <p class="d">Kolumny to forma dziedziczenia (<code>class Car : public Vehicle</code>). Forma <strong>obniża</strong> dostęp do swojego poziomu, nigdy nie podwyższa.</p>
+      <p class="d"><strong>private a protected:</strong> w obu przypadkach klasa pochodna sama widzi public i protected z bazy. Różnica jest dalej: przy <strong>protected</strong> te składniki są dalej widoczne w <strong>kolejnych klasach pochodnych</strong>, przy <strong>private</strong> już nie.</p>
+    </div>
+    <div class="card" style="border-color:var(--inh)">
+      <ul>
+        <li>Klasa bazowa = <b>uogólnienie</b>, pochodne = <b>specjalizacje</b>. Zwykle tworzy się obiekty klas pochodnych.</li>
+        <li><b>Pojedyncze</b>: jedna baza (hierarchia jak drzewo). <b>Wielokrotne</b>: kilka baz, <code>class Motorcycle : public Vehicle, public Bike</code> (hierarchia jak graf).</li>
+        <li>Konstruktory baz wołane <b>od najstarszej klasy</b>; te z argumentami podajesz na liście inicjacyjnej: <code>MagicHorse(char m1, char m2) : Horse(m1), msc(m2)</code></li>
+        <li>Składniki o tej samej nazwie z różnych baz rozróżnia <code>::</code>.</li>
+        <li><code>protected</code> daje pochodnym (i ich przyjaciołom) dostęp do "pół-prywatnych" składników bazy.</li>
+        <li><code>class X final</code> (C++11) - z tej klasy nie można już dziedziczyć.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- POLIMORFIZM -->
+<section id="poly">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--poly)"></div><h2>Polimorfizm i funkcje wirtualne</h2><span class="kol">egzamin 2020, 2023, 2024 · "co wypisze"</span></div>
+  <div class="grid2">
+    <div class="card" style="border-color:var(--poly)">
+<pre class="cpp">Vehicle *p = new Car;      <span class="c">// wskaźnik na bazę może wskazywać pochodną</span>
+p-&gt;start();
+<span class="c">// bez virtual w Vehicle:  "Starting a vehicle."  (decyduje typ WSKAŹNIKA)</span>
+<span class="c">// z virtual w Vehicle:    "Starting a car."      (decyduje typ OBIEKTU)</span></pre>
+      <ul>
+        <li>Funkcja wirtualna: ta sama nazwa, typ wyniku i sygnatura w bazie i pochodnej; wersja zależy od <b>obiektu</b>.</li>
+        <li><code>virtual</code> w bazie; w pochodnej można dopisać <code>override</code> (kompilator sprawdzi, że coś przesłaniasz), <code>final</code> blokuje dalsze przesłanianie.</li>
+        <li><b>Czysta funkcja wirtualna</b> <code>virtual double sum(int) = 0;</code> -&gt; klasa <b>abstrakcyjna</b>: nie da się utworzyć jej obiektu (wskaźnik można).</li>
+        <li><code>obiekt.Baza::funkcja()</code> wymusza wersję z bazy, mimo virtual.</li>
+      </ul>
+    </div>
+    <div class="card" style="border-color:var(--poly)">
+      <p class="t">Przepis na "co wypisze" z <code>Baza *ptr = new Pochodna(...)</code></p>
+      <div class="steps">
+        <div class="step"><div class="n" style="background:rgba(224,124,74,.15);color:var(--poly)">1</div><p><strong>new:</strong> konstruktory od najstarszej klasy w dół, każdy wypisuje swoje.</p></div>
+        <div class="step"><div class="n" style="background:rgba(224,124,74,.15);color:var(--poly)">2</div><p><strong>ptr-&gt;f():</strong> f wirtualna w bazie -&gt; wersja z klasy obiektu (najniższej). Niewirtualna -&gt; z klasy wskaźnika.</p></div>
+        <div class="step"><div class="n" style="background:rgba(224,124,74,.15);color:var(--poly)">3</div><p><strong>delete ptr:</strong> sprawdź, czy destruktor <strong>klasy wskaźnika</strong> jest wirtualny. Tak -&gt; destruktory od dołu do góry. Nie -&gt; tylko destruktor klasy wskaźnika (formalnie UB).</p></div>
+      </div>
+      <p class="d">Pułapka z 2024: <code>Animal</code> nie ma wirtualnego destruktora, a <code>Horse</code> ma. Liczy się klasa wskaźnika, czyli Animal, więc <strong>żaden z wypisujących destruktorów się nie wykona</strong>. Całość w fiszkach.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WSKAŹNIKI -->
+<section id="ptr">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--ptr)"></div><h2>Wskaźniki, new i delete</h2><span class="kol">egzamin 2025 · co przechowuje wskaźnik</span></div>
+  <div class="grid2">
+    <div class="card" style="border-color:var(--ptr)">
+      <ul>
+        <li>Zmienna wskaźnikowa przechowuje <b>adres obiektu danego typu</b>. <code>&amp;x</code> daje adres, <code>*p</code> wartość spod adresu.</li>
+        <li><code>new</code> tworzy obiekt dynamicznie: <b>bez nazwy</b>, nie obowiązują go zasady zakresu, żyje <b>do delete</b>.</li>
+        <li><b>Wyciek pamięci</b>: więcej <code>new</code> niż <code>delete</code>.</li>
+        <li><code>nullptr</code> pasuje do wskaźnika dowolnego typu.</li>
+        <li>Wskaźnik do obiektu: <code>(*p).get()</code> to samo co <code>p-&gt;get()</code>.</li>
+      </ul>
+<pre class="cpp">int *ptr = new int;  *ptr = 7;       <span class="c">// dobrze</span>
+int *ptr = 7;                        <span class="c">// błąd: int to nie adres</span>
+int *ptr;  *ptr = 7;                 <span class="c">// kompiluje się, ale pisze pod losowy adres</span></pre>
+    </div>
+    <div class="card" style="border-color:var(--ptr)">
+      <p class="t">Tablice i funkcje</p>
+<pre class="cpp">double *v = new double[size];   <span class="c">// nazwa tablicy = adres 1. elementu</span>
+v[5] = 33;   *(v + 5) = 33;         <span class="c">// to samo</span>
+delete [] v;                        <span class="c">// [] przy tablicy!</span>
+
+double **m = new double *[size1];   <span class="c">// 2D: tablica wskaźników</span>
+for (int i = 0; i &lt; size1; i++)
+  m[i] = new double[size2];
+
+int (*fun_Ptr)(double, int);        <span class="c">// wskaźnik na funkcję</span>
+fun_Ptr = my_function;              <span class="c">// nazwa funkcji = jej adres</span>
+(*fun_Ptr)(25.0, 3);
+int *fun_Ptr(double, int);          <span class="c">// częsty błąd: to FUNKCJA zwracająca int*</span></pre>
+      <p class="d">Wskaźnik do funkcji pozwala przekazać funkcję jako parametr innej funkcji. Rodowód (<code>Person *father, *mother</code>) to struktura rekurencyjna na wskaźnikach.</p>
+    </div>
+  </div>
+</section>
+
+<!-- KOPIOWANIE -->
+<section id="copy">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--copy)"></div><h2>Konstruktor kopiujący i przenoszący</h2><span class="kol">egzamin 2023, 2024</span></div>
+  <div class="grid2">
+    <div class="card" style="border-color:var(--copy)">
+      <p class="t">Kopiujący: <code>Klasa(const Klasa &amp;original)</code></p>
+      <ul>
+        <li>Kopia powstaje niejawnie przy <b>przekazaniu argumentu przez wartość</b> i przy <b>zwracaniu obiektu</b> z funkcji.</li>
+        <li>Parametr <b>musi być przez referencję</b>. Przez wartość -&gt; żeby zrobić lokalną kopię argumentu, trzeba wywołać konstruktor kopiujący, który znowu potrzebuje kopii... <b>nieskończona rekurencja</b>.</li>
+        <li>Domyślny kopiujący (i przypisanie) kopiuje pole po polu. Przy <b>polach-wskaźnikach</b> to zła kopia: dwa obiekty na tę samą tablicę ("kto ją usunie?"). C++11: można go zablokować <code>= delete</code>.</li>
+      </ul>
+<pre class="cpp">Complex::Complex(const Complex &amp;c){ re = c.re; im = c.im; }
+
+Vector::Vector(const Vector &amp;original){
+  size = original.size;
+  ptr = new double[size];           <span class="c">// własna, nowa tablica</span>
+  for (int i = 0; i &lt; size; i++) ptr[i] = original.ptr[i];
+}</pre>
+    </div>
+    <div class="card" style="border-color:var(--copy)">
+      <p class="t">Przenoszący (C++11): <code>Klasa(Klasa &amp;&amp;original)</code></p>
+      <ul>
+        <li><code>&amp;&amp;</code> = referencja do <b>r-wartości</b> (obiektu tymczasowego).</li>
+        <li>Zamiast kopiować dane, <b>"kradnie"</b> wskaźnik obiektu tymczasowego. Szybkie, bo bez kopiowania tablicy.</li>
+        <li>Po przeniesieniu źródło dostaje <code>nullptr</code> i <code>size = 0</code>, żeby nie było podwójnego dostępu (i podwójnego <code>delete</code>).</li>
+      </ul>
+<pre class="cpp">Vector::Vector(Vector &amp;&amp;original){
+  size = original.size;
+  ptr = original.ptr;               <span class="c">// "steal" data</span>
+  original.ptr = nullptr;
+  original.size = 0;
+}</pre>
+    </div>
+  </div>
+</section>
+
+<!-- SMART -->
+<section id="smart">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--smart)"></div><h2>Wskaźniki inteligentne (C++11)</h2></div>
+  <div class="grid3">
+    <div class="card" style="border-color:var(--smart)">
+      <p class="t"><code>unique_ptr</code></p>
+      <p class="d" style="margin-top:0">Jedyny właściciel. Obiekt usuwany automatycznie, gdy wskaźnik znika (np. przy wcześniejszym <code>return</code>, gdzie zwykły <code>new</code> by wyciekł).</p>
+<pre class="cpp">auto p1 = make_unique&lt;int[]&gt;(135);
+unique_ptr&lt;int[]&gt; p2 = p1;     <span class="c">// BŁĄD: kopia</span>
+Compute(p1);                   <span class="c">// BŁĄD: przez wartość</span>
+unique_ptr&lt;int&gt; p4(move(p3));  <span class="c">// OK: przekazanie</span></pre>
+      <p class="d">Własność można <strong>przekazać</strong>, nie współdzielić.</p>
+    </div>
+    <div class="card" style="border-color:var(--smart)">
+      <p class="t"><code>shared_ptr</code></p>
+      <p class="d" style="margin-top:0">Współdzielona własność z <strong>licznikiem referencji</strong> (<code>use_count()</code>). Licznik = 0 -&gt; obiekt usunięty ("ostatni gasi światło").</p>
+<pre class="cpp">auto p3 = make_shared&lt;int&gt;();
+shared_ptr&lt;int&gt; p5 = p3;       <span class="c">// OK, licznik 2</span></pre>
+      <p class="d"><strong>Zakleszczenie:</strong> A trzyma <code>shared_ptr&lt;B&gt;</code>, B trzyma <code>shared_ptr&lt;A&gt;</code>. Po wyjściu z funkcji liczniki są 1, nie 0, więc nic się nie usuwa.</p>
+    </div>
+    <div class="card" style="border-color:var(--smart)">
+      <p class="t"><code>weak_ptr</code> (miękki)</p>
+      <p class="d" style="margin-top:0">Współdzieli <strong>bez podbijania licznika</strong>. Zawsze razem z <code>shared_ptr</code>; przed dostępem trzeba go zamienić na shared.</p>
+<pre class="cpp">auto p1 = make_shared&lt;int&gt;(58);
+weak_ptr&lt;int&gt; p2(p1);          <span class="c">// licznik dalej 1</span>
+shared_ptr&lt;int&gt; p4(p2);        <span class="c">// teraz dostęp</span>
+if (p2.expired()) ...          <span class="c">// czy obiekt jeszcze jest</span></pre>
+      <p class="d">Rozwiązuje zakleszczenie: jedna ze stron cyklu trzyma <code>weak_ptr</code>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WZORCE -->
+<section id="tpl">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--tpl)"></div><h2>Wzorce klas i pojemniki</h2><span class="kol">podstawa pod listy, drzewa i iteratory z kolejnych wykładów</span></div>
+  <div class="grid2">
+    <div class="card" style="border-color:var(--tpl)">
+<pre class="cpp">template &lt;class Item&gt; class Object {
+  Item leftNode, rightNode;
+public:
+  Object(Item, Item);
+};
+template &lt;class Item&gt; Object&lt;Item&gt;::Object(Item l, Item r)
+  : leftNode(l), rightNode(r) {}
+Object&lt;int&gt; integerPair(3,5);</pre>
+      <p class="d">Wzorzec pozwala zbudować abstrakcyjną strukturę danych na dowolnym typie. Przy definicji poza klasą <strong>za każdym razem</strong> <code>template &lt;class T&gt;</code> i <code>Klasa&lt;T&gt;::</code>.</p>
+      <p class="t" style="margin-top:12px">Pojemniki STL</p>
+      <p class="d" style="margin-top:0">Obiekty przechowujące obiekty innej klasy i zarządzające nimi: wektory, listy, talie (deque), zbiory, stosy, kolejki i kolejki priorytetowe.</p>
+    </div>
+    <div class="card" style="border-color:var(--tpl)">
+      <p class="t">Vector&lt;T&gt; i BoundedVector&lt;T&gt; ze slajdów</p>
+      <ul>
+        <li>Pola <code>T *data; unsigned size;</code> w sekcji <b>protected</b> (żeby pochodna je widziała).</li>
+        <li>Destruktor <code>virtual ~Vector()</code>: <code>delete [] data; data = nullptr; size = 0;</code> - virtual, bo obiekty pochodne mogą być usuwane przez wskaźnik na bazę.</li>
+        <li><code>T &amp; operator[](unsigned) const</code> zwraca <b>referencję</b>, żeby element mógł stać <b>po lewej stronie przypisania</b> (<code>v[3] = 5</code>). Środek: <code>assert(index &lt; size)</code>.</li>
+        <li><code>setSize</code>: nowa tablica, przepisz min(stary, nowy) elementów, resztę <code>initial</code>, <code>delete [] data</code>.</li>
+        <li><code>BoundedVector</code> dziedziczy po <code>Vector&lt;T&gt;</code>, dodaje <code>const int lowBound</code> - indeksy od dowolnej (też ujemnej) liczby.</li>
+      </ul>
+<pre class="cpp">T &amp; BoundedVector&lt;T&gt;::operator[](int index) const {
+  return Vector&lt;T&gt;::operator[](index - lowBound);
+}  <span class="c">// bez Vector&lt;T&gt;:: wywołałby sam siebie (rekurencja)</span>
+
+BoundedVector&lt;int&gt; counts('a', 'z', zero);  <span class="c">// 26 liczników</span>
+counts[c]++;                               <span class="c">// histogram liter</span></pre>
+    </div>
+  </div>
+</section>
+
+<p class="d" style="color:var(--dim2);font-size:.78rem;margin-top:40px;border-top:1px solid var(--line);padding-top:16px">Źródła: slajdy ASD_wyklad-2-1 (J. Tyszer), egzaminy 04.02.2020, 2023, 02.02.2024, 05.02.2025 i stara poprawka. Wyniki "co wypisze" sprawdzone w g++. Kolejne wykłady dopisuję po każdym wykładzie.</p>
+</div>
+</body>
+</html>
