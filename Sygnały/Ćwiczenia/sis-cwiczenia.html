@@ -364,6 +364,9 @@ body.light .ans-tick{color:var(--ind)}
 .pbtn:hover:not([disabled]){border-color:var(--teal);color:var(--txt)}
 .pbtn.pri{border-color:var(--teal);color:var(--teal)}
 .pbtn[disabled]{opacity:.35;cursor:default}
+.vtog{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 14px}
+.vtog-l{font-size:13px;color:var(--txt2);margin-right:4px}
+.vs-wzor .v-ibp,.vs-ibp .v-wzor{display:none}
 .pl-axis{stroke:var(--txt3);stroke-width:1.3}
 .pl-arrow{fill:var(--txt3)}
 .pl-txt{fill:var(--txt3);font-family:var(--m);font-size:11.5px}
@@ -709,6 +712,10 @@ const WZORY = {
    {m:R`\int e^{kt}\,dt=\frac{e^{kt}}{k}`},
    {m:R`\int t^n\,dt=\frac{t^{n+1}}{n+1}`},
    {m:R`\int\sin(\omega t)\,dt=-\frac{\cos\omega t}{\omega},\qquad\int\cos(\omega t)\,dt=\frac{\sin\omega t}{\omega}`}]},
+  {g:'Wykładnicza razy sinus/cosinus (zamiast całkowania przez części)',f:[
+   {m:R`\int e^{\alpha t}\sin(\beta t)\,dt=\frac{e^{\alpha t}(\alpha\sin\beta t-\beta\cos\beta t)}{\alpha^2+\beta^2}+C`},
+   {m:R`\int e^{\alpha t}\cos(\beta t)\,dt=\frac{e^{\alpha t}(\alpha\cos\beta t+\beta\sin\beta t)}{\alpha^2+\beta^2}+C`},
+   {l:'od 0 do nieskończoności, a>0',m:R`\int_0^\infty e^{-at}\sin\omega t\,dt=\frac{\omega}{a^2+\omega^2},\qquad\int_0^\infty e^{-at}\cos\omega t\,dt=\frac{a}{a^2+\omega^2}`}]},
   {g:'Granice przy nieskończoności',f:[
    {m:R`a>0:\quad e^{-at}\xrightarrow[t\to\infty]{}0,\qquad e^{at}\xrightarrow[t\to-\infty]{}0`}]}
  ]}
@@ -1540,7 +1547,7 @@ PROBS.push(
 {n:33,lab:'D',ch:1,c:'dom',ct:'Zadanie domowe',sb:'średnia: A sin · e^(−at) · 1(t)',src:'zadanie domowe z ćwiczeń (tablica)',
  p:R`f(t)=A\sin\left(\frac{2\pi}{T}t\right)\cdot e^{-at}\cdot\mathbf{1}(t),\qquad a>0`,
  txt:R`Oblicz wartość średnią sygnału $f(t)$ z rysunku. Użyj wzoru na wartość średnią funkcji nieokresowej.`,
- M:R`Sygnał gaśnie, więc nie jest okresowy: $\bar f=\lim_{\tau\to\infty}\frac1\tau\int_{-\tau/2}^{\tau/2}f\,dt$. $\mathbf{1}(t)$ obcina całkę do $(0,\frac\tau2)$, całkę liczymy dwa razy przez części, a na końcu granica: skończone pole dzielone przez $\tau\to\infty$ daje $0$.`,
+ M:R`Sygnał gaśnie, więc nie jest okresowy: $\bar f=\lim_{\tau\to\infty}\frac1\tau\int_{-\tau/2}^{\tau/2}f\,dt$. $\mathbf{1}(t)$ obcina całkę do $(0,\frac\tau2)$, całkę bierzemy z gotowego wzoru (albo dwa razy przez części), a na końcu granica: skończone pole dzielone przez $\tau\to\infty$ daje $0$.`,
  plot:{t0:-1.2,t1:4.4,y0:-0.85,y1:1.2,ylab:'f(t)',ticksY:[[1,'A']],ticksT:[[0.5,'T/2'],[1,'T'],[2,'2T'],[3,'3T']],frames:[
   {cap:R`Klocek (1) z tablicy: $A\sin\left(\frac{2\pi}{T}t\right)$ - zwykły sinus, amplituda $A$, pełny okres co $T$ (szary).`,L:[{k:'curve',fn:'Math.sin(2*Math.PI*t)',a:-1.2,b:4.4,cls:'ghost'}]},
   {cap:R`Klocek (2): $e^{-at}$ (przerywany). W $t=0$ równa się $1$, w prawo maleje do zera. Razem z $-e^{-at}$ tworzy "lejek", w którym zmieści się sinus. Dla $t<0$ rośnie, ale zaraz to wyłączymy.`,L:[{k:'curve',fn:'Math.exp(-0.6*t)',a:-1.2,b:4.4,cls:'dash'},{k:'curve',fn:'-Math.exp(-0.6*t)',a:-1.2,b:4.4,cls:'dash'}]},
@@ -1733,21 +1740,33 @@ STEPS[33]=[
   [R`=0+A\int_{0}^{\tau/2}e^{-at}\sin(\omega t)\,dt`,R`całka z zera to zero; stała $A$ przed całkę`],
   [R`\bar f=\lim_{\tau\to\infty}\frac{A}{\tau}\int_{0}^{\tau/2}e^{-at}\sin(\omega t)\,dt`,R`trzecia linijka z tablicy`]]},
  {t:R`Uwaga na granicę $\frac\tau2$`,n:R`Górna granica to $\frac\tau2$, a nie $\infty$. Całkę liczymy do $\frac\tau2$, a $\tau\to\infty$ robimy dopiero na samym końcu, po podzieleniu przez $\tau$. Kolejność: najpierw całka, potem dzielenie, na końcu granica.`},
- {t:R`Plan: całka przez części, dwa razy`,n:R`Oznaczmy $I=\int e^{-at}\sin(\omega t)\,dt$ (najpierw funkcja pierwotna, granice później). Iloczyn wykładniczej i sinusa liczy się przez części. Po dwóch razach wraca ta sama całka $I$ i dostajemy równanie, z którego ją wyliczymy.`,L:[
+  {v:'wzor',t:R`Gotowy wzór na całkę $e^{\alpha t}\cdot\sin\beta t$`,n:R`Całka "wykładnicza razy sinus" jest tablicowa, nie trzeba jej za każdym razem wyprowadzać. $\alpha$ i $\beta$ to dowolne liczby: $\alpha$ stoi w wykładniku, $\beta$ w sinusie.`,L:[
+   [R`\int e^{\alpha t}\sin(\beta t)\,dt=\frac{e^{\alpha t}\big(\alpha\sin\beta t-\beta\cos\beta t\big)}{\alpha^2+\beta^2}+C`,R`wzór ogólny (dla sinusa)`],
+   [R`\int e^{\alpha t}\cos(\beta t)\,dt=\frac{e^{\alpha t}\big(\alpha\cos\beta t+\beta\sin\beta t\big)}{\alpha^2+\beta^2}+C`,R`dla porządku wersja z cosinusem`]]},
+ {v:'wzor',t:R`Podstawiamy $\alpha=-a$, $\beta=\omega$`,n:R`U nas w wykładniku jest $-at$, a w sinusie $\omega t$. Oznaczmy $I=\int e^{-at}\sin(\omega t)\,dt$.`,L:[
+   [R`\alpha=-a,\qquad\beta=\omega`,R`odczytujemy z $e^{-at}\sin(\omega t)$`],
+   [R`I=\frac{e^{-at}\big((-a)\sin\omega t-\omega\cos\omega t\big)}{(-a)^2+\omega^2}`,R`wstawiamy do wzoru`],
+   [R`I=\frac{e^{-at}\big(-a\sin\omega t-\omega\cos\omega t\big)}{a^2+\omega^2}`,R`$(-a)^2=a^2$`],
+   [R`I=-\frac{e^{-at}\Big(a\sin(\omega t)+\omega\cos(\omega t)\Big)}{a^2+\omega^2}`,R`wyciągamy minus przed ułamek. Ten sam wynik co dwa razy przez części`]]},
+ {v:'wzor',t:R`Skąd ten wzór (Euler, jedna linijka)`,n:R`Nieobowiązkowe. Sinus to część urojona $e^{j\beta t}$, a eksponentę całkuje się od ręki.`,L:[
+   [R`e^{\alpha t}\sin\beta t=\mathrm{Im}\,e^{(\alpha+j\beta)t}`,R`$e^{j\beta t}=\cos\beta t+j\sin\beta t$`],
+   [R`\int e^{(\alpha+j\beta)t}\,dt=\frac{e^{(\alpha+j\beta)t}}{\alpha+j\beta}=\frac{(\alpha-j\beta)\,e^{\alpha t}\big(\cos\beta t+j\sin\beta t\big)}{\alpha^2+\beta^2}`,R`$\int e^{kt}dt=\frac{e^{kt}}{k}$; mnożymy góra-dół przez sprzężenie $\alpha-j\beta$`],
+   [R`\mathrm{Im}\Big[(\alpha-j\beta)(\cos\beta t+j\sin\beta t)\Big]=\alpha\sin\beta t-\beta\cos\beta t`,R`zbieramy wyrazy z $j$: $j\alpha\sin-j\beta\cos$`]]},
+ {v:'ibp',t:R`Plan: całka przez części, dwa razy`,n:R`Oznaczmy $I=\int e^{-at}\sin(\omega t)\,dt$ (najpierw funkcja pierwotna, granice później). Iloczyn wykładniczej i sinusa liczy się przez części. Po dwóch razach wraca ta sama całka $I$ i dostajemy równanie, z którego ją wyliczymy.`,L:[
   [R`\int u\,dv=u\,v-\int v\,du`,R`wzór na całkowanie przez części`],
   [R`u=\sin(\omega t)\;\Rightarrow\;du=\omega\cos(\omega t)\,dt`,R`$u$ różniczkujemy`],
   [R`dv=e^{-at}\,dt\;\Rightarrow\;v=\int e^{-at}\,dt=-\frac1a\,e^{-at}`,R`$dv$ całkujemy: $\int e^{kt}dt=\frac{e^{kt}}{k}$ z $k=-a$`]]},
- {t:R`Pierwsze całkowanie przez części`,L:[
+ {v:'ibp',t:R`Pierwsze całkowanie przez części`,L:[
   [R`I=\sin(\omega t)\cdot\left(-\frac1a e^{-at}\right)-\int\left(-\frac1a e^{-at}\right)\cdot\omega\cos(\omega t)\,dt`,R`wstawiamy do $uv-\int v\,du$`],
   [R`I=-\frac1a e^{-at}\sin(\omega t)+\frac{\omega}{a}\int e^{-at}\cos(\omega t)\,dt`,R`minus razy minus = plus; stałe $\frac\omega a$ przed całkę`],
   [R`J=\int e^{-at}\cos(\omega t)\,dt`,R`została nowa całka, nazwijmy ją $J$`]]},
- {t:R`Drugie całkowanie przez części (dla $J$)`,L:[
+ {v:'ibp',t:R`Drugie całkowanie przez części (dla $J$)`,L:[
   [R`u=\cos(\omega t)\;\Rightarrow\;du=-\omega\sin(\omega t)\,dt`,R`pochodna cosinusa to minus sinus`],
   [R`dv=e^{-at}\,dt\;\Rightarrow\;v=-\frac1a e^{-at}`,R`tak samo jak wcześniej`],
   [R`J=\cos(\omega t)\cdot\left(-\frac1a e^{-at}\right)-\int\left(-\frac1a e^{-at}\right)\cdot\left(-\omega\sin(\omega t)\right)dt`,R`wzór na części`],
   [R`J=-\frac1a e^{-at}\cos(\omega t)-\frac{\omega}{a}\int e^{-at}\sin(\omega t)\,dt`,R`w środku minus razy minus = plus, ale przed całką stoi minus, więc zostaje minus`],
   [R`J=-\frac1a e^{-at}\cos(\omega t)-\frac{\omega}{a}\,I`,R`wróciła nasza całka $I$`]]},
- {t:R`Wstawiamy $J$ do $I$ i rozwiązujemy równanie`,L:[
+ {v:'ibp',t:R`Wstawiamy $J$ do $I$ i rozwiązujemy równanie`,L:[
   [R`I=-\frac1a e^{-at}\sin(\omega t)+\frac{\omega}{a}\left(-\frac1a e^{-at}\cos(\omega t)-\frac{\omega}{a}\,I\right)`,R`w miejsce $J$`],
   [R`I=-\frac1a e^{-at}\sin(\omega t)-\frac{\omega}{a^2}e^{-at}\cos(\omega t)-\frac{\omega^2}{a^2}\,I`,R`wymnażamy nawias przez $\frac\omega a$`],
   [R`I+\frac{\omega^2}{a^2}\,I=-\frac1a e^{-at}\sin(\omega t)-\frac{\omega}{a^2}e^{-at}\cos(\omega t)`,R`przenosimy $I$ na lewą stronę`],
@@ -1781,7 +1800,7 @@ STEPS[33]=[
   [R`\bar f=\frac A2`,R`sensowne: połowę osi (przed zerem) sygnał to $0$, połowę $A$`]]},
  {t:R`Jak to zapisać na kartce (wersja do oddania)`,L:[
   [R`\bar f=\lim_{\tau\to\infty}\frac1\tau\int_{-\tau/2}^{\tau/2}A\sin(\omega t)\,e^{-at}\,\mathbf{1}(t)\,dt=\lim_{\tau\to\infty}\frac A\tau\int_0^{\tau/2}e^{-at}\sin(\omega t)\,dt`,R`$\omega=\frac{2\pi}T$`],
-  [R`\int e^{-at}\sin(\omega t)\,dt=-\frac{e^{-at}\big(a\sin\omega t+\omega\cos\omega t\big)}{a^2+\omega^2}`,R`dwa razy przez części`],
+  [R`\int e^{-at}\sin(\omega t)\,dt=-\frac{e^{-at}\big(a\sin\omega t+\omega\cos\omega t\big)}{a^2+\omega^2}`,R`<span class="v-wzor">ze wzoru tablicowego ($\alpha=-a$, $\beta=\omega$)</span><span class="v-ibp">dwa razy przez części</span>`],
   [R`\bar f=\lim_{\tau\to\infty}\frac{A}{\tau\,(a^2+\omega^2)}\Big[\omega-e^{-a\tau/2}\big(a\sin\tfrac{\omega\tau}2+\omega\cos\tfrac{\omega\tau}2\big)\Big]`,R``],
   [R`\bar f=0`,R`nawias jest ograniczony (najwyżej $\omega+a+\omega$), a $\frac1\tau\to0$`]]}
 ];
@@ -1993,11 +2012,21 @@ function nav(n){
   const pv=i>0?ORDER[i-1]:null, nx=(i>=0&&i<ORDER.length-1)?ORDER[i+1]:null;
   return (pv!=null?`<button class="pbtn" onclick="show(${pv})">&lt;- zad. ${esc(P(pv).lab)}</button>`:'<span></span>')+(nx!=null?`<button class="pbtn pri" onclick="show(${nx})">zad. ${esc(P(nx).lab)} -&gt;</button>`:'');
 }
+let SOLV='wzor';
+function setSolv(m){
+  SOLV=m;
+  ['wzor','ibp'].forEach(k=>{ const d=document.getElementById('vs_'+k), b=document.getElementById('vb_'+k); if(d) d.hidden=(k!==m); if(b) b.classList.toggle('pri',k===m); });
+}
 function show(n){
   const p = PROBS.find(x=>x.n===n); if(!p) return;
   setActive('pi_'+n);
-  const steps = p.steps.map((s,i)=>`<div class="step"><div class="sh"><div class="snum c3">${i+1}</div><div class="stitle">${RN(s.t)}</div></div>
+  const hasV = p.steps.some(s=>s.v);
+  const mkSteps = mode => p.steps.filter(s=>!s.v||!mode||s.v===mode).map((s,i)=>`<div class="step"><div class="sh"><div class="snum c3">${i+1}</div><div class="stitle">${RN(s.t)}</div></div>
      <div class="sbody">${s.n?`<div class="sintro">${RN(s.n)}</div>`:''}${s.m?K(s.m,true):''}${s.L?linesHTML(s.L):''}${s.pascal?`<div id="pas">${pascalBox()}</div>`:''}${s.newton?newtonTable(s.newton.n,s.newton.minus):''}</div></div>`).join('');
+  const steps = hasV
+    ? `<div class="vtog"><span class="vtog-l">Całkę liczymy:</span><button class="pbtn${SOLV==='wzor'?' pri':''}" id="vb_wzor" onclick="setSolv('wzor')">WZÓR</button><button class="pbtn${SOLV==='ibp'?' pri':''}" id="vb_ibp" onclick="setSolv('ibp')">IBP (przez części)</button></div>`+
+      `<div id="vs_wzor" class="vs-wzor"${SOLV==='wzor'?'':' hidden'}>${mkSteps('wzor')}</div><div id="vs_ibp" class="vs-ibp"${SOLV==='ibp'?'':' hidden'}>${mkSteps('ibp')}</div>`
+    : mkSteps(null);
   document.getElementById('main').innerHTML = `<div class="sol">
     <div class="prob-card c3"><span class="pg">${({energia:'E',moc:'P',srednia:'f̄',euler:'e^j',sinwyk:'∿',wyksin:'∿',sredp:'x̄',dom:'f̄'})[p.c]||''}</span>
       <div class="prob-meta"><span class="pbadge c3">Zad.&nbsp;${esc(p.lab)}</span><span class="pcat">${esc(p.ct)}</span></div>
