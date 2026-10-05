@@ -443,6 +443,7 @@ body.light .ans-tick{color:var(--ind)}
   <div class="wzory-top">
     <p>Wzory</p>
     <div class="wzory-btns">
+      <button class="wbtn" onclick="showWzory('sin')">Sinus, T, ω</button>
       <button class="wbtn" onclick="showWzory('podst')">E, P, średnia</button>
       <button class="wbtn" onclick="showWzory('tryg')">Trygonometria</button>
       <button class="wbtn" onclick="showWzory('calki')">Całki</button>
@@ -1405,6 +1406,409 @@ STEPS[13] = [
   L:[[R`P=\frac12\cdot2\cdot\frac{8}{15}=\frac{8}{15}`,R``]]}
 ];
 
+/* ======================= NOWY ROZDZIAŁ I: SINUS + WARTOŚĆ ŚREDNIA + ZADANIE DOMOWE ======================= */
+PROBS.forEach(p=>{ p.lab='z'+p.n; p.ch=2; });
+
+function sinF2W(o){
+  const fn=`${o.sg*o.A}*Math.${o.kind}(${o.w}*t)`;
+  const base=o.kind==='sin'?[0,1,0,-1,0]:[1,0,-1,0,1];
+  const pts=base.map((y,i)=>({k:'pt',t:i*o.T/4,y:o.sg*o.A*y}));
+  const c3=o.kind==='sin'
+   ? R`Krok 3: pięć punktów co $\frac T4$. Sinus startuje od zera: $0$ w $t=0$, maksimum $${o.A}$ w $\frac T4$, zero w $\frac T2$, minimum $-${o.A}$ w $\frac{3T}4$ i znowu zero w $T$.`
+   : R`Krok 3: pięć punktów co $\frac T4$. Cosinus startuje od maksimum: $${o.A}$ w $t=0$, zero w $\frac T4$, minimum $-${o.A}$ w $\frac T2$, zero w $\frac{3T}4$ i znowu $${o.A}$ w $T$.`;
+  return {t0:o.t0,t1:o.t1,y0:-1.35*o.A,y1:1.35*o.A,ylab:'x(t)',ticksY:[[o.A,String(o.A)],[-o.A,'−'+o.A]],ticksT:o.ticksT,frames:[
+   {cap:R`Krok 1: amplituda. $A=${o.A}$, więc sygnał waha się między $${o.A}$ a $-${o.A}$. Rysujemy dwie przerywane linie: wykres nigdy ich nie przekroczy.`,L:[{k:'hl',y:o.A,a:o.t0,b:o.t1},{k:'hl',y:-o.A,a:o.t0,b:o.t1}]},
+   {cap:R`Krok 2: okres. $T=\frac{2\pi}{\omega}=${o.Ttex}$. Zaznaczamy na osi jeden pełny okres, od $0$ do $T$, i dzielimy go na 4 równe części.`,L:[{k:'band',a:0,b:o.T,s:'1 okres: T = '+o.Tlab}]},
+   {cap:c3,L:pts},
+   {cap:R`Krok 4: łączymy punkty gładką falą (zaokrąglone górki, nie trójkąty). To jest jeden okres.`,L:[{k:'curve',fn,a:0,b:o.T}]},
+   {cap:R`Krok 5: kopiujemy ten okres w prawo i w lewo co $T$. Wykres gotowy.`,L:[{k:'curve',fn,a:o.t0,b:0,cls:'rep'},{k:'curve',fn,a:o.T,b:o.t1,cls:'rep'}]}
+  ]};
+}
+function sinW2F(o){
+  const fn=`${o.sg*o.A}*Math.${o.kind}(${o.w}*t)`;
+  const tm=o.kind==='cos'?0:(o.sg>0?o.T/4:3*o.T/4);
+  const c4=o.kind==='cos'
+   ? R`Co jest w $t=0$? Maksimum, więc to cosinus. Wzór: $x(t)=${o.x}$.`
+   : (o.sg>0 ? R`Co jest w $t=0$? Wykres przechodzi przez zero i idzie w górę, więc to sinus. Wzór: $x(t)=${o.x}$.`
+             : R`Co jest w $t=0$? Zero, ale wykres idzie w dół. Zwykły sinus po zerze idzie w górę, więc tu jest sinus z minusem: $x(t)=${o.x}$.`);
+  return {t0:o.t0,t1:o.t1,y0:-1.35*o.A,y1:1.35*o.A,ylab:'x(t)',ticksY:[[o.A,String(o.A)],[-o.A,'−'+o.A]],ticksT:o.ticksT,frames:[
+   {cap:R`Mamy gotowy wykres. Szukamy trzech rzeczy: amplitudy $A$, okresu $T$ (z niego policzymy $\omega$) oraz tego, czy to sinus, czy cosinus.`,L:[{k:'curve',fn,a:o.t0,b:o.t1}]},
+   {cap:R`Amplituda to największe wychylenie od osi. Najwyższy punkt leży na $${o.A}$, najniższy na $-${o.A}$, więc $A=${o.A}$.`,L:[{k:'hl',y:o.A,a:o.t0,b:o.t1},{k:'hl',y:-o.A,a:o.t0,b:o.t1}]},
+   {cap:R`Okres to odległość między dwoma sąsiednimi maksimami. Tu: $T=${o.Tread}$. Stąd $\omega=\frac{2\pi}{T}=${o.wtex}$.`,L:[{k:'band',a:tm,b:tm+o.T,s:'T = '+o.Tlab},{k:'pt',t:tm,y:o.A},{k:'pt',t:tm+o.T,y:o.A}]},
+   {cap:c4,L:[{k:'pt',t:0,y:o.kind==='cos'?o.A:0}]}
+  ]};
+}
+const kp=(t,arg,val,why)=>[R`t=${t}:\quad x=${arg}=${val}`,why||''];
+
+PROBS.push(
+/* ---------- wzór -> wykres ---------- */
+{n:21,lab:'1',ch:1,c:'sinwyk',ct:'Wzór -> wykres',sb:'x(t) = 3 sin(2πt)',src:'typowe zadanie na start (ćwiczenia 1)',
+ p:R`x(t)=3\sin(2\pi t)`,txt:R`Odczytaj amplitudę, pulsację, okres i częstotliwość. Narysuj sygnał.`,
+ M:R`Porównujemy z postacią $A\sin(\omega t)$: liczba przed sinusem to $A$, liczba przy $t$ to $\omega$. Okres $T=\frac{2\pi}{\omega}$, potem 5 punktów co $\frac T4$.`,
+ plot:sinF2W({A:3,w:'2*Math.PI',kind:'sin',sg:1,T:1,t0:-0.3,t1:2.25,Ttex:R`\frac{2\pi}{2\pi}=1\,\text{s}`,Tlab:'1 s',ticksT:[[0.25,'0,25'],[0.5,'0,5'],[0.75,'0,75'],[1,'1'],[1.5,'1,5'],[2,'2']]}),
+ steps:[],a:R`A=3,\quad\omega=2\pi\,\tfrac{\text{rad}}{\text{s}},\quad T=1\,\text{s},\quad f=1\,\text{Hz}`},
+{n:22,lab:'2',ch:1,c:'sinwyk',ct:'Wzór -> wykres',sb:'x(t) = 2 cos(4πt)',src:'typowe zadanie na start (ćwiczenia 1)',
+ p:R`x(t)=2\cos(4\pi t)`,txt:R`Odczytaj amplitudę, pulsację, okres i częstotliwość. Narysuj sygnał.`,
+ M:R`Jak w zad. 1, ale cosinus: w $t=0$ zaczyna od maksimum, a nie od zera.`,
+ plot:sinF2W({A:2,w:'4*Math.PI',kind:'cos',sg:1,T:0.5,t0:-0.15,t1:1.12,Ttex:R`\frac{2\pi}{4\pi}=0{,}5\,\text{s}`,Tlab:'0,5 s',ticksT:[[0.125,'0,125'],[0.25,'0,25'],[0.375,'0,375'],[0.5,'0,5'],[1,'1']]}),
+ steps:[],a:R`A=2,\quad\omega=4\pi\,\tfrac{\text{rad}}{\text{s}},\quad T=0{,}5\,\text{s},\quad f=2\,\text{Hz}`},
+{n:23,lab:'3',ch:1,c:'sinwyk',ct:'Wzór -> wykres',sb:'x(t) = 5 sin(πt/2)',src:'typowe zadanie na start (ćwiczenia 1)',
+ p:R`x(t)=5\sin\left(\frac{\pi}{2}t\right)`,txt:R`Odczytaj amplitudę, pulsację, okres i częstotliwość. Narysuj sygnał.`,
+ M:R`Pulsacja może być ułamkiem: $\omega=\frac\pi2$. Mała pulsacja = długi okres.`,
+ plot:sinF2W({A:5,w:'Math.PI/2',kind:'sin',sg:1,T:4,t0:-0.8,t1:8.9,Ttex:R`\frac{2\pi}{\pi/2}=4\,\text{s}`,Tlab:'4 s',ticksT:[[1,'1'],[2,'2'],[3,'3'],[4,'4'],[6,'6'],[8,'8']]}),
+ steps:[],a:R`A=5,\quad\omega=\tfrac{\pi}{2}\,\tfrac{\text{rad}}{\text{s}},\quad T=4\,\text{s},\quad f=0{,}25\,\text{Hz}`},
+{n:24,lab:'4',ch:1,c:'sinwyk',ct:'Wzór -> wykres',sb:'A = 1, f = 50 Hz',src:'typowe zadanie na start (ćwiczenia 1)',
+ p:R`A=1,\qquad f=50\,\text{Hz}`,txt:R`Zapisz wzór sinusa $x(t)=A\sin(\omega t)$ o amplitudzie $1$ i częstotliwości $50\,\text{Hz}$ (sieć w gniazdku) i narysuj go.`,
+ M:R`Tym razem dana jest częstotliwość $f$, nie $\omega$. Przeliczamy: $\omega=2\pi f$, $T=\frac1f$.`,
+ plot:sinF2W({A:1,w:'2*Math.PI/20',kind:'sin',sg:1,T:20,t0:-3,t1:43,Ttex:R`\frac{2\pi}{100\pi}=0{,}02\,\text{s}=20\,\text{ms}`,Tlab:'20 ms',ticksT:[[5,'5'],[10,'10'],[15,'15'],[20,'20 ms'],[40,'40 ms']]}),
+ steps:[],a:R`x(t)=\sin(100\pi t),\quad\omega=100\pi\,\tfrac{\text{rad}}{\text{s}},\quad T=20\,\text{ms}`},
+
+/* ---------- wykres -> wzór ---------- */
+{n:25,lab:'5',ch:1,c:'wyksin',ct:'Wykres -> wzór',sb:'z wykresu: sinus, A = 4',src:'typowe zadanie na start (ćwiczenia 1)',
+ p:R`x(t)=\;?`,txt:R`Na rysunku jest sygnał sinusoidalny. Odczytaj amplitudę i okres, policz pulsację i zapisz wzór $x(t)$.`,
+ M:R`Odwrotnie niż wcześniej: $A$ = najwyższy punkt, $T$ = odstęp między sąsiednimi maksimami, $\omega=\frac{2\pi}{T}$, a po wartości w $t=0$ poznajemy, czy sin, czy cos.`,
+ plot:sinW2F({A:4,w:'4*Math.PI',kind:'sin',sg:1,T:0.5,t0:-0.15,t1:1.12,Tread:R`0{,}625-0{,}125=0{,}5\,\text{s}`,Tlab:'0,5 s',wtex:R`\frac{2\pi}{0{,}5}=4\pi`,x:R`4\sin(4\pi t)`,ticksT:[[0.125,'0,125'],[0.25,'0,25'],[0.5,'0,5'],[0.625,'0,625'],[1,'1']]}),
+ steps:[],a:R`x(t)=4\sin(4\pi t)`},
+{n:26,lab:'6',ch:1,c:'wyksin',ct:'Wykres -> wzór',sb:'z wykresu: cosinus, A = 2',src:'typowe zadanie na start (ćwiczenia 1)',
+ p:R`x(t)=\;?`,txt:R`Na rysunku jest sygnał sinusoidalny. Odczytaj amplitudę i okres, policz pulsację i zapisz wzór $x(t)$.`,
+ M:R`Ten sam przepis. Uwaga na początek: w $t=0$ jest maksimum, czyli cosinus.`,
+ plot:sinW2F({A:2,w:'Math.PI',kind:'cos',sg:1,T:2,t0:-0.5,t1:4.4,Tread:R`2-0=2\,\text{s}`,Tlab:'2 s',wtex:R`\frac{2\pi}{2}=\pi`,x:R`2\cos(\pi t)`,ticksT:[[0.5,'0,5'],[1,'1'],[1.5,'1,5'],[2,'2'],[3,'3'],[4,'4']]}),
+ steps:[],a:R`x(t)=2\cos(\pi t)`},
+{n:27,lab:'7',ch:1,c:'wyksin',ct:'Wykres -> wzór',sb:'z wykresu: sinus z minusem',src:'typowe zadanie na start (ćwiczenia 1)',
+ p:R`x(t)=\;?`,txt:R`Na rysunku jest sygnał sinusoidalny. Odczytaj amplitudę i okres, policz pulsację i zapisz wzór $x(t)$.`,
+ M:R`Pułapka: w $t=0$ jest zero, ale wykres idzie w dół. To sinus odwrócony minusem.`,
+ plot:sinW2F({A:3,w:'Math.PI',kind:'sin',sg:-1,T:2,t0:-0.5,t1:4.4,Tread:R`3{,}5-1{,}5=2\,\text{s}`,Tlab:'2 s',wtex:R`\frac{2\pi}{2}=\pi`,x:R`-3\sin(\pi t)`,ticksT:[[0.5,'0,5'],[1,'1'],[1.5,'1,5'],[2,'2'],[3,'3'],[3.5,'3,5']]}),
+ steps:[],a:R`x(t)=-3\sin(\pi t)`},
+
+/* ---------- wartość średnia ---------- */
+{n:28,lab:'8',ch:1,c:'sredp',ct:'Wartość średnia',sb:'prostokąt: A przez pół okresu',src:'typowe zadanie (ćwiczenia 1)',
+ p:R`x(t)=\begin{cases}A, & t\in\left(0,\tfrac T2\right)\\[2pt] 0, & t\in\left(\tfrac T2,T\right)\end{cases}\quad\text{okresowo co }T`,
+ txt:R`Oblicz wartość średnią prostokątnego sygnału okresowego z rysunku.`,
+ M:R`$\bar x=\frac1T\int_0^Tx\,dt$ = pole pod wykresem w jednym okresie podzielone przez $T$. Tu pole to prostokąt.`,
+ plot:{t0:-1.25,t1:2.25,y0:-0.2,y1:1.35,ylab:'x(t)',ticksY:[[1,'A']],ticksT:[[0.5,'T/2'],[1,'T'],[2,'2T']],frames:[
+  {cap:R`Osie. Na osi czasu $\frac T2$ i $T$, na pionowej poziom $A$.`,L:[]},
+  {cap:R`Jeden okres: przez pierwszą połowę $A$, przez drugą $0$.`,L:[{k:'poly',pts:[[0,0],[0,1],[0.5,1],[0.5,0],[1,0]]},{k:'band',a:0,b:1,s:'1 okres'}]},
+  {cap:R`Kopie co $T$.`,L:[{k:'poly',pts:[[-1.25,0],[-1,0],[-1,1],[-0.5,1],[-0.5,0],[0,0]],cls:'rep'},{k:'poly',pts:[[1,0],[1,1],[1.5,1],[1.5,0],[2,0],[2,1],[2.25,1]],cls:'rep'}]},
+  {cap:R`Całka po okresie = <b>pole</b> zaznaczonego prostokąta: $A\cdot\frac T2$.`,L:[{k:'rect',a:0,b:0.5,h:1},{k:'lbl',t:0.08,y:0.5,s:'A·T/2'}]},
+  {cap:R`Średnia = pole / $T$ = $\frac A2$. Czerwona linia: prostokąt o wysokości $\frac A2$ na całym okresie ma to samo pole, co impuls. Górka "przelewa się" do doliny.`,L:[{k:'hl',y:0.5,a:-1.25,b:2.25,cls:'mean',s:'A/2'}]}
+ ]},steps:[],a:R`\bar x=\frac A2`},
+{n:29,lab:'9',ch:1,c:'sredp',ct:'Wartość średnia',sb:'prostokąt: +A i −A',src:'typowe zadanie (ćwiczenia 1)',
+ p:R`x(t)=\begin{cases}A, & t\in\left(0,\tfrac T2\right)\\[2pt] -A, & t\in\left(\tfrac T2,T\right)\end{cases}\quad\text{okresowo co }T`,
+ txt:R`Oblicz wartość średnią prostokątnego sygnału okresowego z rysunku (fala prostokątna dwubiegunowa).`,
+ M:R`Pole pod osią liczy się z minusem. Tyle samo nad osią i pod osią daje średnią $0$.`,
+ plot:{t0:-1.25,t1:2.25,y0:-1.35,y1:1.35,ylab:'x(t)',ticksY:[[1,'A'],[-1,'−A']],ticksT:[[0.5,'T/2'],[1,'T'],[2,'2T']],frames:[
+  {cap:R`Osie i poziomy $A$, $-A$.`,L:[]},
+  {cap:R`Jeden okres: pół okresu $A$, pół okresu $-A$.`,L:[{k:'poly',pts:[[0,0],[0,1],[0.5,1],[0.5,-1],[1,-1],[1,0]]},{k:'band',a:0,b:1,s:'1 okres'}]},
+  {cap:R`Kopie co $T$.`,L:[{k:'poly',pts:[[-1.25,-1],[-1,-1],[-1,1],[-0.5,1],[-0.5,-1],[0,-1],[0,0]],cls:'rep'},{k:'poly',pts:[[1,0],[1,1],[1.5,1],[1.5,-1],[2,-1],[2,1],[2.25,1]],cls:'rep'}]},
+  {cap:R`Pole nad osią: $+A\cdot\frac T2$. Pole pod osią: $-A\cdot\frac T2$ (całka liczy je z minusem). Suma: $0$.`,L:[{k:'area',fn:'t<0.5?1:-1',a:0,b:1}]},
+  {cap:R`Średnia $=\frac{0}{T}=0$. Linia średniej leży na osi.`,L:[{k:'hl',y:0,a:-1.25,b:2.25,cls:'mean',s:'średnia = 0'}]}
+ ]},steps:[],a:R`\bar x=0`},
+{n:30,lab:'10',ch:1,c:'sredp',ct:'Wartość średnia',sb:'trójkąt: w górę do T/2, w dół do T',src:'typowe zadanie (ćwiczenia 1)',
+ p:R`x(t)\ \text{- trójkąt: od }0\text{ do }A\text{ na }\left(0,\tfrac T2\right),\ \text{od }A\text{ do }0\text{ na }\left(\tfrac T2,T\right)`,
+ txt:R`Oblicz wartość średnią okresowego sygnału trójkątnego z rysunku.`,
+ M:R`Dwa odcinki prostej: dla każdego wzór z dwóch punktów, dwie całki, suma przez $T$. Sprawdzenie geometrią: pole trójkąta $\frac12\cdot T\cdot A$.`,
+ plot:{t0:-1.25,t1:2.25,y0:-0.2,y1:1.35,ylab:'x(t)',ticksY:[[1,'A']],ticksT:[[0.5,'T/2'],[1,'T'],[2,'2T']],frames:[
+  {cap:R`Osie: $\frac T2$, $T$ i poziom $A$.`,L:[]},
+  {cap:R`Pierwszy odcinek: od $(0,0)$ w górę do $\left(\frac T2,A\right)$.`,L:[{k:'seg',a:[0,0],b:[0.5,1]},{k:'pt',t:0,y:0},{k:'pt',t:0.5,y:1}]},
+  {cap:R`Drugi odcinek: od $\left(\frac T2,A\right)$ w dół do $(T,0)$.`,L:[{k:'seg',a:[0.5,1],b:[1,0]},{k:'pt',t:1,y:0},{k:'band',a:0,b:1,s:'1 okres'}]},
+  {cap:R`Kopie co $T$: ząbki się stykają, bez skoków.`,L:[{k:'poly',pts:[[-1,0],[-0.5,1],[0,0]],cls:'rep'},{k:'poly',pts:[[1,0],[1.5,1],[2,0],[2.25,0.5]],cls:'rep'},{k:'seg',a:[-1.25,0.5],b:[-1,0],cls:'rep'}]},
+  {cap:R`Całka po okresie = pole trójkąta $=\frac12\cdot T\cdot A$.`,L:[{k:'area',fn:'t<0.5?2*t:2-2*t',a:0,b:1},{k:'lbl',t:0.35,y:0.3,s:'A·T/2'}]},
+  {cap:R`Średnia = pole / $T$ = $\frac A2$. Czubek trójkąta nad czerwoną linią wypełnia dwa puste rogi pod nią.`,L:[{k:'hl',y:0.5,a:-1.25,b:2.25,cls:'mean',s:'A/2'}]}
+ ]},steps:[],a:R`\bar x=\frac A2`},
+{n:31,lab:'11',ch:1,c:'sredp',ct:'Wartość średnia',sb:'piła: od 0 do A',src:'typowe zadanie (ćwiczenia 1)',
+ p:R`x(t)=\frac AT\,t\ \ \text{dla }t\in(0,T),\ \text{okresowo co }T`,
+ txt:R`Oblicz wartość średnią sygnału piłokształtnego z rysunku.`,
+ M:R`Jeden odcinek prostej, jedna całka. Geometrycznie znowu trójkąt.`,
+ plot:{t0:-1.25,t1:2.3,y0:-0.2,y1:1.35,ylab:'x(t)',ticksY:[[1,'A']],ticksT:[[1,'T'],[2,'2T']],frames:[
+  {cap:R`Osie: $T$ i poziom $A$.`,L:[]},
+  {cap:R`Jeden okres: prosta od $(0,0)$ do $(T,A)$.`,L:[{k:'seg',a:[0,0],b:[1,1]},{k:'pt',t:0,y:0},{k:'pt',t:1,y:1,open:true},{k:'band',a:0,b:1,s:'1 okres'}]},
+  {cap:R`W $T$ spadek do zera i od nowa.`,L:[{k:'seg',a:[1,1],b:[1,0],cls:'dash'},{k:'seg',a:[1,0],b:[2,1],cls:'rep'},{k:'seg',a:[2,1],b:[2,0],cls:'dash'},{k:'seg',a:[2,0],b:[2.3,0.3],cls:'rep'},{k:'seg',a:[-1,0],b:[0,1],cls:'rep'},{k:'seg',a:[0,1],b:[0,0],cls:'dash'}]},
+  {cap:R`Pole w okresie: trójkąt $\frac12\cdot T\cdot A$.`,L:[{k:'area',fn:'t',a:0,b:1}]},
+  {cap:R`Średnia $=\frac A2$ - tyle samo co trójkąt z zad. 10. Liczy się pole, nie kształt.`,L:[{k:'hl',y:0.5,a:-1.25,b:2.3,cls:'mean',s:'A/2'}]}
+ ]},steps:[],a:R`\bar x=\frac A2`},
+{n:32,lab:'12',ch:1,c:'sredp',ct:'Wartość średnia',sb:'x(t) = 2 + 3 sin(2πt)',src:'typowe zadanie (ćwiczenia 1)',
+ p:R`x(t)=2+3\sin(2\pi t)`,txt:R`Oblicz wartość średnią sygnału. Narysuj go.`,
+ M:R`Średnia z sumy = suma średnich. Średnia sinusa po okresie to $0$, średnia stałej to ta stała.`,
+ plot:{t0:-0.3,t1:2.25,y0:-1.6,y1:5.8,ylab:'x(t)',ticksY:[[2,'2'],[5,'5'],[-1,'−1']],ticksT:[[0.25,'0,25'],[0.5,'0,5'],[0.75,'0,75'],[1,'1'],[2,'2']],frames:[
+  {cap:R`Stała $2$ przesuwa sinusa w górę: jego środek jest na poziomie $2$. Amplituda $3$: od $2-3=-1$ do $2+3=5$.`,L:[{k:'hl',y:5,a:-0.3,b:2.25},{k:'hl',y:-1,a:-0.3,b:2.25},{k:'hl',y:2,a:-0.3,b:2.25}]},
+  {cap:R`Okres sinusa: $T=\frac{2\pi}{2\pi}=1$. Jeden okres wokół poziomu $2$.`,L:[{k:'curve',fn:'2+3*Math.sin(2*Math.PI*t)',a:0,b:1},{k:'band',a:0,b:1,s:'T = 1'}]},
+  {cap:R`Kopie co $1$.`,L:[{k:'curve',fn:'2+3*Math.sin(2*Math.PI*t)',a:-0.3,b:0,cls:'rep'},{k:'curve',fn:'2+3*Math.sin(2*Math.PI*t)',a:1,b:2.25,cls:'rep'}]},
+  {cap:R`Średnia $=2$: górka nad linią $2$ i dolina pod nią mają to samo pole, więc się znoszą.`,L:[{k:'hl',y:2,a:-0.3,b:2.25,cls:'mean',s:'średnia = 2'}]}
+ ]},steps:[],a:R`\bar x=2`},
+
+/* ---------- zadanie domowe ---------- */
+{n:33,lab:'D',ch:1,c:'dom',ct:'Zadanie domowe',sb:'średnia: A sin · e^(−at) · 1(t)',src:'zadanie domowe z ćwiczeń (tablica)',
+ p:R`f(t)=A\sin\left(\frac{2\pi}{T}t\right)\cdot e^{-at}\cdot\mathbf{1}(t),\qquad a>0`,
+ txt:R`Oblicz wartość średnią sygnału $f(t)$ z rysunku. Użyj wzoru na wartość średnią funkcji nieokresowej.`,
+ M:R`Sygnał gaśnie, więc nie jest okresowy: $\bar f=\lim_{\tau\to\infty}\frac1\tau\int_{-\tau/2}^{\tau/2}f\,dt$. $\mathbf{1}(t)$ obcina całkę do $(0,\frac\tau2)$, całkę liczymy dwa razy przez części, a na końcu granica: skończone pole dzielone przez $\tau\to\infty$ daje $0$.`,
+ plot:{t0:-1.2,t1:4.4,y0:-0.85,y1:1.2,ylab:'f(t)',ticksY:[[1,'A']],ticksT:[[0.5,'T/2'],[1,'T'],[2,'2T'],[3,'3T']],frames:[
+  {cap:R`Klocek (1) z tablicy: $A\sin\left(\frac{2\pi}{T}t\right)$ - zwykły sinus, amplituda $A$, pełny okres co $T$ (szary).`,L:[{k:'curve',fn:'Math.sin(2*Math.PI*t)',a:-1.2,b:4.4,cls:'ghost'}]},
+  {cap:R`Klocek (2): $e^{-at}$ (przerywany). W $t=0$ równa się $1$, w prawo maleje do zera. Razem z $-e^{-at}$ tworzy "lejek", w którym zmieści się sinus. Dla $t<0$ rośnie, ale zaraz to wyłączymy.`,L:[{k:'curve',fn:'Math.exp(-0.6*t)',a:-1.2,b:4.4,cls:'dash'},{k:'curve',fn:'-Math.exp(-0.6*t)',a:-1.2,b:4.4,cls:'dash'}]},
+  {cap:R`Klocek (3): $\mathbf{1}(t)$ - włącznik (fioletowy). Przed zerem mnoży wszystko przez $0$, od zera przez $1$.`,L:[{k:'poly',pts:[[-1.2,0],[0,0],[0,1],[4.4,1]],cls:'ghost2'}]},
+  {cap:R`Iloczyn trzech klocków: przed zerem cisza, od zera sinus ściśnięty lejkiem. Pierwsza górka sięga prawie $A$, każda następna niższa.`,L:[{k:'seg',a:[-1.2,0],b:[0,0]},{k:'curve',fn:'Math.exp(-0.6*t)*Math.sin(2*Math.PI*t)',a:0,b:4.4}]},
+  {cap:R`Całka = pole: górki z plusem, doliny z minusem. Górki są odrobinę większe od kolejnych dolin, ale wszystko gaśnie, więc łączne pole to <b>skończona liczba</b>.`,L:[{k:'area',fn:'t<0?0:Math.exp(-0.6*t)*Math.sin(2*Math.PI*t)',a:-1.2,b:4.4,cls:'sq'}]},
+  {cap:R`Okno $\left(-\frac\tau2,\frac\tau2\right)$ ze wzoru (tu dla małego $\tau$). Średnia w oknie = pole w oknie / $\tau$. Gdy $\tau$ rośnie, pole przestaje rosnąć (sygnał zgasł), a $\tau$ rośnie dalej, więc iloraz spada do $0$.`,L:[{k:'band',a:-1.1,b:1.1,s:'okno szerokości τ'},{k:'vline',t:-1.1},{k:'vline',t:1.1}]}
+ ]},steps:[],a:R`\bar f=0`}
+);
+
+/* ---------- rozwiązania nowych zadań ---------- */
+STEPS[21]=[
+ {t:R`Odczytujemy $A$ i $\omega$ ze wzoru`,n:R`Każdy sinus ma postać $A\sin(\omega t)$. Wystarczy porównać.`,L:[
+  [R`x(t)=A\sin(\omega t)`,R`postać ogólna`],
+  [R`x(t)=3\sin(2\pi t)`,R`nasz sygnał`],
+  [R`A=3`,R`liczba przed sinusem: amplituda (największe wychylenie)`],
+  [R`\omega=2\pi\ \tfrac{\text{rad}}{\text{s}}`,R`liczba stojąca przy $t$ w środku sinusa: pulsacja`]]},
+ {t:R`Okres i częstotliwość`,n:R`Sinus powtarza się, gdy jego argument przyrośnie o $2\pi$. Czyli $\omega T=2\pi$.`,L:[
+  [R`\omega T=2\pi\;\Rightarrow\;T=\frac{2\pi}{\omega}`,R`wzór na okres`],
+  [R`T=\frac{2\pi}{2\pi}=1\,\text{s}`,R`wstawiamy $\omega=2\pi$`],
+  [R`f=\frac1T=\frac11=1\,\text{Hz}`,R`ile okresów na sekundę`]]},
+ {t:R`Punkty kontrolne co $\frac T4=0{,}25\,\text{s}$`,n:R`Liczymy wartość w 5 punktach jednego okresu. Wartości sinusa: $\sin0=0$, $\sin\frac\pi2=1$, $\sin\pi=0$, $\sin\frac{3\pi}2=-1$, $\sin2\pi=0$.`,L:[
+  kp('0',R`3\sin(2\pi\cdot0)=3\sin0`,'0'),
+  kp('0{,}25',R`3\sin(2\pi\cdot0{,}25)=3\sin\tfrac\pi2`,'3','maksimum'),
+  kp('0{,}5',R`3\sin(2\pi\cdot0{,}5)=3\sin\pi`,'0'),
+  kp('0{,}75',R`3\sin(2\pi\cdot0{,}75)=3\sin\tfrac{3\pi}2`,'-3','minimum'),
+  kp('1',R`3\sin(2\pi\cdot1)=3\sin2\pi`,'0','koniec okresu')]},
+ {t:R`Rysujemy`,n:R`Łączymy punkty gładką falą i kopiujemy co $T=1$. Przeklikaj rysunek wyżej: każdy krok to jeden ruch długopisem.`}
+];
+STEPS[22]=[
+ {t:R`Odczytujemy $A$ i $\omega$`,L:[
+  [R`x(t)=A\cos(\omega t)`,R`postać ogólna`],
+  [R`x(t)=2\cos(4\pi t)`,R`nasz sygnał`],
+  [R`A=2,\qquad\omega=4\pi\ \tfrac{\text{rad}}{\text{s}}`,R`porównujemy`]]},
+ {t:R`Okres i częstotliwość`,L:[
+  [R`T=\frac{2\pi}{\omega}=\frac{2\pi}{4\pi}=\frac12=0{,}5\,\text{s}`,R`$\pi$ się skraca`],
+  [R`f=\frac1T=\frac{1}{0{,}5}=2\,\text{Hz}`,R`dwa okresy na sekundę`]]},
+ {t:R`Punkty kontrolne co $\frac T4=0{,}125\,\text{s}$`,n:R`Cosinus: $\cos0=1$, $\cos\frac\pi2=0$, $\cos\pi=-1$, $\cos\frac{3\pi}2=0$, $\cos2\pi=1$.`,L:[
+  kp('0',R`2\cos0`,'2','cosinus startuje od maksimum'),
+  kp('0{,}125',R`2\cos(4\pi\cdot0{,}125)=2\cos\tfrac\pi2`,'0'),
+  kp('0{,}25',R`2\cos(4\pi\cdot0{,}25)=2\cos\pi`,'-2','minimum'),
+  kp('0{,}375',R`2\cos(4\pi\cdot0{,}375)=2\cos\tfrac{3\pi}2`,'0'),
+  kp('0{,}5',R`2\cos(4\pi\cdot0{,}5)=2\cos2\pi`,'2','koniec okresu')]},
+ {t:R`Różnica sin / cos na rysunku`,n:R`Kształt fali jest ten sam. Cosinus to sinus przesunięty o $\frac T4$ w lewo: zaczyna od góry zamiast od zera.`}
+];
+STEPS[23]=[
+ {t:R`Odczytujemy $A$ i $\omega$`,L:[
+  [R`x(t)=5\sin\left(\frac\pi2t\right)`,R`nasz sygnał`],
+  [R`A=5,\qquad\omega=\frac\pi2\ \tfrac{\text{rad}}{\text{s}}`,R`przy $t$ stoi $\frac\pi2$`]]},
+ {t:R`Okres i częstotliwość`,n:R`Dzielenie przez ułamek = mnożenie przez odwrotność.`,L:[
+  [R`T=\frac{2\pi}{\omega}=\frac{2\pi}{\pi/2}`,R``],
+  [R`=2\pi\cdot\frac2\pi=4\,\text{s}`,R`odwracamy ułamek, $\pi$ się skraca`],
+  [R`f=\frac1T=\frac14=0{,}25\,\text{Hz}`,R``]]},
+ {t:R`Punkty kontrolne co $\frac T4=1\,\text{s}$`,L:[
+  kp('0',R`5\sin0`,'0'),
+  kp('1',R`5\sin\tfrac\pi2`,'5','maksimum'),
+  kp('2',R`5\sin\pi`,'0'),
+  kp('3',R`5\sin\tfrac{3\pi}2`,'-5','minimum'),
+  kp('4',R`5\sin2\pi`,'0')]},
+ {t:R`Zapamiętaj`,n:R`Duże $\omega$ = szybkie drgania = krótki okres. Małe $\omega$ = wolne drgania = długi okres. Tu $\omega<\pi$, więc okres dłuższy niż $2\,\text{s}$.`}
+];
+STEPS[24]=[
+ {t:R`Pulsacja z częstotliwości`,n:R`Jeden okres to $2\pi$ radianów, a w sekundzie mieści się $f$ okresów. Stąd $\omega=2\pi f$.`,L:[
+  [R`\omega=2\pi f`,R`wzór`],
+  [R`\omega=2\pi\cdot50=100\pi\ \tfrac{\text{rad}}{\text{s}}`,R`wstawiamy $f=50$`]]},
+ {t:R`Okres`,L:[
+  [R`T=\frac1f=\frac1{50}=0{,}02\,\text{s}`,R``],
+  [R`0{,}02\,\text{s}=20\,\text{ms}`,R`$1\,\text{s}=1000\,\text{ms}$; na osi wygodniej w milisekundach`],
+  [R`T=\frac{2\pi}{\omega}=\frac{2\pi}{100\pi}=0{,}02\,\text{s}`,R`sprawdzenie drugim wzorem: zgadza się`]]},
+ {t:R`Wzór`,L:[[R`x(t)=A\sin(\omega t)=1\cdot\sin(100\pi t)=\sin(100\pi t)`,R`amplitudy $1$ się nie pisze`]]},
+ {t:R`Punkty co $\frac T4=5\,\text{ms}$`,L:[
+  kp(R`0`,R`\sin0`,'0'),
+  kp(R`5\,\text{ms}`,R`\sin(100\pi\cdot0{,}005)=\sin\tfrac\pi2`,'1'),
+  kp(R`10\,\text{ms}`,R`\sin(100\pi\cdot0{,}01)=\sin\pi`,'0'),
+  kp(R`15\,\text{ms}`,R`\sin\tfrac{3\pi}2`,'-1'),
+  kp(R`20\,\text{ms}`,R`\sin2\pi`,'0')]}
+];
+STEPS[25]=[
+ {t:R`Amplituda`,L:[[R`x_{\max}=4\;\Rightarrow\;A=4`,R`najwyższy punkt wykresu`]]},
+ {t:R`Okres`,n:R`Bierzemy dwa sąsiednie maksima i odejmujemy ich czasy.`,L:[
+  [R`t_1=0{,}125\,\text{s},\qquad t_2=0{,}625\,\text{s}`,R`odczyt z osi`],
+  [R`T=t_2-t_1=0{,}625-0{,}125=0{,}5\,\text{s}`,R``]]},
+ {t:R`Pulsacja`,L:[[R`\omega=\frac{2\pi}{T}=\frac{2\pi}{0{,}5}=4\pi\ \tfrac{\text{rad}}{\text{s}}`,R`dzielenie przez $0{,}5$ = mnożenie przez $2$`]]},
+ {t:R`Sinus czy cosinus?`,L:[[R`x(0)=0,\ \text{potem rośnie}\;\Rightarrow\;\sin`,R`cosinus w $0$ byłby na maksimum`]]},
+ {t:R`Wzór i sprawdzenie`,L:[
+  [R`x(t)=4\sin(4\pi t)`,R``],
+  [R`x(0{,}125)=4\sin(4\pi\cdot0{,}125)=4\sin\tfrac\pi2=4\;\checkmark`,R`w miejscu maksimum wychodzi $A$`]]}
+];
+STEPS[26]=[
+ {t:R`Amplituda`,L:[[R`x_{\max}=2\;\Rightarrow\;A=2`,R``]]},
+ {t:R`Okres`,L:[
+  [R`\text{maksima w } t=0 \text{ i } t=2`,R`odczyt z osi`],
+  [R`T=2-0=2\,\text{s}`,R``]]},
+ {t:R`Pulsacja`,L:[[R`\omega=\frac{2\pi}{T}=\frac{2\pi}2=\pi\ \tfrac{\text{rad}}{\text{s}}`,R``]]},
+ {t:R`Sinus czy cosinus?`,L:[[R`x(0)=2=A\;\Rightarrow\;\cos`,R`w $t=0$ maksimum`]]},
+ {t:R`Wzór i sprawdzenie`,L:[
+  [R`x(t)=2\cos(\pi t)`,R``],
+  [R`x(1)=2\cos\pi=-2\;\checkmark`,R`w połowie okresu minimum, zgadza się z wykresem`]]}
+];
+STEPS[27]=[
+ {t:R`Amplituda`,n:R`Amplituda jest zawsze dodatnia. Minus (odwrócenie) zapiszemy osobno.`,L:[[R`x_{\max}=3\;\Rightarrow\;A=3`,R``]]},
+ {t:R`Okres`,L:[
+  [R`\text{maksima w } t=1{,}5 \text{ i } t=3{,}5`,R`odczyt z osi`],
+  [R`T=3{,}5-1{,}5=2\,\text{s}`,R``],
+  [R`\omega=\frac{2\pi}{2}=\pi\ \tfrac{\text{rad}}{\text{s}}`,R``]]},
+ {t:R`Sinus czy cosinus, i znak`,L:[
+  [R`x(0)=0\;\Rightarrow\;\sin`,R`cosinus w $0$ nie byłby zerem`],
+  [R`\text{po } t=0 \text{ wykres maleje}\;\Rightarrow\;-\sin`,R`zwykły sinus po zerze rośnie, więc tu jest odbity minusem`]]},
+ {t:R`Wzór i sprawdzenie`,L:[
+  [R`x(t)=-3\sin(\pi t)`,R``],
+  [R`x(0{,}5)=-3\sin\tfrac\pi2=-3\;\checkmark`,R`w $t=0{,}5$ na wykresie jest minimum`]]}
+];
+STEPS[28]=[
+ {t:R`Wzór na wartość średnią`,n:R`Pole pod wykresem w jednym okresie, podzielone przez długość okresu.`,L:[[R`\bar x=\frac1T\int_0^Tx(t)\,dt`,R``]]},
+ {t:R`Dzielimy całkę na kawałki`,L:[
+  [R`\bar x=\frac1T\left(\int_0^{T/2}A\,dt+\int_{T/2}^{T}0\,dt\right)`,R`w każdym kawałku jego wartość`],
+  [R`=\frac1T\int_0^{T/2}A\,dt`,R`całka z zera to zero`]]},
+ {t:R`Całka ze stałej`,L:[
+  [R`\int_0^{T/2}A\,dt=A\Big[t\Big]_0^{T/2}`,R`pierwotna stałej $A$ to $A\,t$`],
+  [R`=A\left(\frac T2-0\right)=\frac{AT}{2}`,R`pole prostokąta`]]},
+ {t:R`Wynik`,L:[[R`\bar x=\frac1T\cdot\frac{AT}2=\frac A2`,R`$T$ się skraca`]]},
+ {t:R`Wersja ogólna (na kolosie)`,n:R`Jeśli impuls $A$ trwa $t_i$ z okresu $T$, to średnia $=A\cdot\frac{t_i}{T}$ (wypełnienie). Np. impuls przez $\frac T4$: średnia $\frac A4$.`,L:[[R`\bar x=A\cdot\frac{t_i}{T}`,R``]]}
+];
+STEPS[29]=[
+ {t:R`Wzór i kawałki`,L:[
+  [R`\bar x=\frac1T\left(\int_0^{T/2}A\,dt+\int_{T/2}^{T}(-A)\,dt\right)`,R``]]},
+ {t:R`Dwie całki`,L:[
+  [R`\int_0^{T/2}A\,dt=A\cdot\frac T2`,R`stała razy długość przedziału`],
+  [R`\int_{T/2}^{T}(-A)\,dt=-A\left(T-\frac T2\right)=-A\cdot\frac T2`,R`długość drugiego kawałka też $\frac T2$`]]},
+ {t:R`Wynik`,L:[[R`\bar x=\frac1T\left(\frac{AT}2-\frac{AT}2\right)=0`,R`pola nad i pod osią się znoszą`]]}
+];
+STEPS[30]=[
+ {t:R`Wzór na średnią`,L:[[R`\bar x=\frac1T\int_0^Tx(t)\,dt`,R``]]},
+ {t:R`Pierwszy odcinek: prosta przez $(0,0)$ i $\left(\frac T2,A\right)$`,L:[
+  [R`x(t)=m\,t+b`,R`równanie prostej`],
+  [R`(0,0):\;0=m\cdot0+b\;\Rightarrow\;b=0`,R``],
+  [R`\left(\tfrac T2,A\right):\;A=m\cdot\frac T2\;\Rightarrow\;m=\frac{2A}{T}`,R`mnożymy obie strony przez $\frac2T$`],
+  [R`x(t)=\frac{2A}{T}\,t,\qquad t\in\left(0,\tfrac T2\right)`,R``]]},
+ {t:R`Drugi odcinek: prosta przez $\left(\frac T2,A\right)$ i $(T,0)$`,L:[
+  [R`m=\frac{0-A}{T-\frac T2}=\frac{-A}{T/2}=-\frac{2A}{T}`,R`nachylenie = zmiana wartości / zmiana czasu`],
+  [R`(T,0):\;0=-\frac{2A}{T}\cdot T+b\;\Rightarrow\;b=2A`,R`wstawiamy punkt końcowy`],
+  [R`x(t)=2A-\frac{2A}{T}\,t,\qquad t\in\left(\tfrac T2,T\right)`,R``]]},
+ {t:R`Pierwsza całka`,L:[
+  [R`\int_0^{T/2}\frac{2A}{T}t\,dt=\frac{2A}{T}\left[\frac{t^2}{2}\right]_0^{T/2}`,R`$\int t\,dt=\frac{t^2}2$`],
+  [R`=\frac{2A}{T}\cdot\frac{(T/2)^2}{2}=\frac{2A}{T}\cdot\frac{T^2}{8}=\frac{AT}{4}`,R`$\left(\frac T2\right)^2=\frac{T^2}4$`]]},
+ {t:R`Druga całka`,L:[
+  [R`\int_{T/2}^{T}\left(2A-\frac{2A}{T}t\right)dt=\left[2At-\frac{A}{T}t^2\right]_{T/2}^{T}`,R`pierwotna: $2A\cdot t$ oraz $\frac{2A}{T}\cdot\frac{t^2}2$`],
+  [R`\text{w } T:\quad 2AT-\frac AT T^2=2AT-AT=AT`,R`górna granica`],
+  [R`\text{w } \tfrac T2:\quad 2A\cdot\frac T2-\frac AT\cdot\frac{T^2}4=AT-\frac{AT}4=\frac{3AT}4`,R`dolna granica`],
+  [R`AT-\frac{3AT}4=\frac{AT}4`,R`górna minus dolna: tyle samo co pierwsza (symetria)`]]},
+ {t:R`Wynik`,L:[
+  [R`\bar x=\frac1T\left(\frac{AT}4+\frac{AT}4\right)=\frac1T\cdot\frac{AT}2=\frac A2`,R``]]},
+ {t:R`Szybko geometrią`,n:R`Całka to pole trójkąta o podstawie $T$ i wysokości $A$. Na kolosie możesz tak sprawdzić wynik.`,L:[[R`\bar x=\frac{\tfrac12\cdot T\cdot A}{T}=\frac A2`,R``]]}
+];
+STEPS[31]=[
+ {t:R`Wzór i całka`,L:[
+  [R`\bar x=\frac1T\int_0^T\frac AT\,t\,dt`,R``],
+  [R`=\frac{A}{T^2}\left[\frac{t^2}2\right]_0^T=\frac{A}{T^2}\cdot\frac{T^2}2`,R`stałe przed całkę: $\frac1T\cdot\frac AT$`],
+  [R`=\frac A2`,R`$T^2$ się skraca`]]},
+ {t:R`Geometrią`,L:[[R`\bar x=\frac{\tfrac12\cdot T\cdot A}{T}=\frac A2`,R`trójkąt jak w zad. 10, tylko "przekrzywiony"`]]}
+];
+STEPS[32]=[
+ {t:R`Okres`,L:[[R`T=\frac{2\pi}{2\pi}=1`,R`stała nie ma okresu, decyduje sinus`]]},
+ {t:R`Średnia z sumy`,L:[
+  [R`\bar x=\frac11\int_0^1\big(2+3\sin(2\pi t)\big)dt=\int_0^12\,dt+3\int_0^1\sin(2\pi t)\,dt`,R`całka sumy = suma całek`],
+  [R`\int_0^12\,dt=2`,R`stała razy długość przedziału`],
+  [R`\int_0^1\sin(2\pi t)\,dt=\left[-\frac{\cos2\pi t}{2\pi}\right]_0^1=-\frac{\cos2\pi-\cos0}{2\pi}=-\frac{1-1}{2\pi}=0`,R`sinus po pełnym okresie: górka i dolina się znoszą`]]},
+ {t:R`Wynik`,L:[[R`\bar x=2+3\cdot0=2`,R`średnia = składowa stała`]]}
+];
+STEPS[33]=[
+ {t:R`Co jest na tablicy: trzy klocki`,n:R`Sygnał to iloczyn trzech prostych funkcji (na tablicy oznaczone 1, 2, 3). Rozpoznajemy każdą osobno, wtedy wiadomo, skąd bierze się rysunek.`,L:[
+  [R`f(t)=A\sin\left(\frac{2\pi}{T}t\right)\cdot e^{-at}\cdot\mathbf{1}(t)`,R`cały sygnał`],
+  [R`(1)\;\;A\sin\left(\frac{2\pi}{T}t\right)`,R`zwykły sinus: amplituda $A$, pulsacja $\omega=\frac{2\pi}{T}$, więc okres $T$`],
+  [R`(2)\;\;e^{-at},\quad a>0`,R`obwiednia: w $t=0$ równa $1$, potem maleje do zera i "ściska" sinusa`],
+  [R`(3)\;\;\mathbf{1}(t)=\begin{cases}0, & t<0\\ 1, & t\ge0\end{cases}`,R`skok jednostkowy, "włącznik": przed zerem sygnał jest wyłączony`]]},
+ {t:R`Dlaczego nie wzór na średnią okresową`,n:R`Wzór $\frac1T\int_T$ działa tylko, gdy sygnał się powtarza. Sprawdźmy: przesuwamy sygnał o jeden okres $T$ (dla $t>0$).`,L:[
+  [R`f(t+T)=A\sin\left(\frac{2\pi}{T}(t+T)\right)e^{-a(t+T)}`,R`wstawiamy $t+T$ zamiast $t$`],
+  [R`=A\sin\left(\frac{2\pi}{T}t+2\pi\right)e^{-at}\,e^{-aT}`,R`wymnażamy nawias; $e^{x+y}=e^x\,e^y$`],
+  [R`=A\sin\left(\frac{2\pi}{T}t\right)e^{-at}\cdot e^{-aT}=e^{-aT}\cdot f(t)`,R`sinus nie zmienia się po dodaniu $2\pi$`],
+  [R`e^{-aT}<1\;\Rightarrow\;f(t+T)\neq f(t)`,R`każda kolejna górka jest mniejsza: sygnał <b>nie jest okresowy</b>`]]},
+ {t:R`Wzór na średnią sygnału nieokresowego: co znaczy $\tau$`,n:R`Brak okresu, więc nie ma jednego kawałka, po którym można uśrednić. Bierzemy okno szerokości $\tau$ wokół zera, liczymy w nim zwykłą średnią (pole / szerokość), a potem okno rozciągamy do nieskończoności. Okno widać w ostatnim kroku rysunku.`,L:[
+  [R`\bar f=\lim_{\tau\to\infty}\frac1\tau\int_{-\tau/2}^{\tau/2}f(t)\,dt`,R`wzór z tablicy`],
+  [R`\int_{-\tau/2}^{\tau/2}f(t)\,dt`,R`pole pod wykresem w oknie od $-\frac\tau2$ do $\frac\tau2$ (szerokość okna $\tau$)`],
+  [R`\frac1\tau\int_{-\tau/2}^{\tau/2}f(t)\,dt`,R`pole przez szerokość = średnia w oknie; dokładnie jak $\frac1T\int_T$, tylko $\tau$ zamiast $T$`],
+  [R`\lim_{\tau\to\infty}`,R`okno rośnie, aż obejmie cały sygnał`]]},
+ {t:R`Wstawiamy sygnał`,n:R`Dla krótszego zapisu: $\omega=\frac{2\pi}{T}$.`,L:[
+  [R`\bar f=\lim_{\tau\to\infty}\frac1\tau\int_{-\tau/2}^{\tau/2}\mathbf{1}(t)\,A\,e^{-at}\sin(\omega t)\,dt`,R`druga linijka z tablicy`]]},
+ {t:R`$\mathbf{1}(t)$ obcina całkę do $t\ge0$`,L:[
+  [R`\int_{-\tau/2}^{\tau/2}\ldots\,dt=\int_{-\tau/2}^{0}0\cdot\ldots\,dt+\int_{0}^{\tau/2}1\cdot A\,e^{-at}\sin(\omega t)\,dt`,R`dzielimy w $t=0$, gdzie $\mathbf{1}(t)$ zmienia wartość`],
+  [R`=0+A\int_{0}^{\tau/2}e^{-at}\sin(\omega t)\,dt`,R`całka z zera to zero; stała $A$ przed całkę`],
+  [R`\bar f=\lim_{\tau\to\infty}\frac{A}{\tau}\int_{0}^{\tau/2}e^{-at}\sin(\omega t)\,dt`,R`trzecia linijka z tablicy`]]},
+ {t:R`Uwaga na granicę $\frac\tau2$`,n:R`Górna granica to $\frac\tau2$, a nie $\infty$. Całkę liczymy do $\frac\tau2$, a $\tau\to\infty$ robimy dopiero na samym końcu, po podzieleniu przez $\tau$. Kolejność: najpierw całka, potem dzielenie, na końcu granica.`},
+ {t:R`Plan: całka przez części, dwa razy`,n:R`Oznaczmy $I=\int e^{-at}\sin(\omega t)\,dt$ (najpierw funkcja pierwotna, granice później). Iloczyn wykładniczej i sinusa liczy się przez części. Po dwóch razach wraca ta sama całka $I$ i dostajemy równanie, z którego ją wyliczymy.`,L:[
+  [R`\int u\,dv=u\,v-\int v\,du`,R`wzór na całkowanie przez części`],
+  [R`u=\sin(\omega t)\;\Rightarrow\;du=\omega\cos(\omega t)\,dt`,R`$u$ różniczkujemy`],
+  [R`dv=e^{-at}\,dt\;\Rightarrow\;v=\int e^{-at}\,dt=-\frac1a\,e^{-at}`,R`$dv$ całkujemy: $\int e^{kt}dt=\frac{e^{kt}}{k}$ z $k=-a$`]]},
+ {t:R`Pierwsze całkowanie przez części`,L:[
+  [R`I=\sin(\omega t)\cdot\left(-\frac1a e^{-at}\right)-\int\left(-\frac1a e^{-at}\right)\cdot\omega\cos(\omega t)\,dt`,R`wstawiamy do $uv-\int v\,du$`],
+  [R`I=-\frac1a e^{-at}\sin(\omega t)+\frac{\omega}{a}\int e^{-at}\cos(\omega t)\,dt`,R`minus razy minus = plus; stałe $\frac\omega a$ przed całkę`],
+  [R`J=\int e^{-at}\cos(\omega t)\,dt`,R`została nowa całka, nazwijmy ją $J$`]]},
+ {t:R`Drugie całkowanie przez części (dla $J$)`,L:[
+  [R`u=\cos(\omega t)\;\Rightarrow\;du=-\omega\sin(\omega t)\,dt`,R`pochodna cosinusa to minus sinus`],
+  [R`dv=e^{-at}\,dt\;\Rightarrow\;v=-\frac1a e^{-at}`,R`tak samo jak wcześniej`],
+  [R`J=\cos(\omega t)\cdot\left(-\frac1a e^{-at}\right)-\int\left(-\frac1a e^{-at}\right)\cdot\left(-\omega\sin(\omega t)\right)dt`,R`wzór na części`],
+  [R`J=-\frac1a e^{-at}\cos(\omega t)-\frac{\omega}{a}\int e^{-at}\sin(\omega t)\,dt`,R`w środku minus razy minus = plus, ale przed całką stoi minus, więc zostaje minus`],
+  [R`J=-\frac1a e^{-at}\cos(\omega t)-\frac{\omega}{a}\,I`,R`wróciła nasza całka $I$`]]},
+ {t:R`Wstawiamy $J$ do $I$ i rozwiązujemy równanie`,L:[
+  [R`I=-\frac1a e^{-at}\sin(\omega t)+\frac{\omega}{a}\left(-\frac1a e^{-at}\cos(\omega t)-\frac{\omega}{a}\,I\right)`,R`w miejsce $J$`],
+  [R`I=-\frac1a e^{-at}\sin(\omega t)-\frac{\omega}{a^2}e^{-at}\cos(\omega t)-\frac{\omega^2}{a^2}\,I`,R`wymnażamy nawias przez $\frac\omega a$`],
+  [R`I+\frac{\omega^2}{a^2}\,I=-\frac1a e^{-at}\sin(\omega t)-\frac{\omega}{a^2}e^{-at}\cos(\omega t)`,R`przenosimy $I$ na lewą stronę`],
+  [R`\frac{a^2+\omega^2}{a^2}\,I=-\frac{e^{-at}}{a^2}\Big(a\sin(\omega t)+\omega\cos(\omega t)\Big)`,R`z lewej wyciągamy $I$, z prawej $-\frac{e^{-at}}{a^2}$ (bo $\frac1a=\frac{a}{a^2}$)`],
+  [R`I=-\frac{e^{-at}\Big(a\sin(\omega t)+\omega\cos(\omega t)\Big)}{a^2+\omega^2}`,R`mnożymy obie strony przez $\frac{a^2}{a^2+\omega^2}$`]]},
+ {t:R`Sprawdzenie: pochodna wyniku`,n:R`Nieobowiązkowe, ale daje pewność. Oznaczmy $D=a^2+\omega^2$ i $F(t)=I$. Jeśli $F'(t)=e^{-at}\sin\omega t$, to całka jest dobra.`,L:[
+  [R`F(t)=-\frac1D\,e^{-at}\Big(a\sin\omega t+\omega\cos\omega t\Big)`,R``],
+  [R`F'(t)=-\frac1D\Big[-a\,e^{-at}\big(a\sin\omega t+\omega\cos\omega t\big)+e^{-at}\big(a\omega\cos\omega t-\omega^2\sin\omega t\big)\Big]`,R`pochodna iloczynu: $(gh)'=g'h+gh'$`],
+  [R`=-\frac{e^{-at}}{D}\Big(-a^2\sin\omega t-a\omega\cos\omega t+a\omega\cos\omega t-\omega^2\sin\omega t\Big)`,R`wymnażamy`],
+  [R`=-\frac{e^{-at}}{D}\cdot\Big(-(a^2+\omega^2)\sin\omega t\Big)=e^{-at}\sin\omega t\;\checkmark`,R`$a\omega\cos$ się znoszą, a $a^2+\omega^2=D$ skraca się z mianownikiem`]]},
+ {t:R`Wstawiamy granice: od $0$ do $\frac\tau2$`,L:[
+  [R`\int_0^{\tau/2}e^{-at}\sin\omega t\,dt=F\!\left(\tfrac\tau2\right)-F(0)`,R`górna minus dolna`],
+  [R`F(0)=-\frac{e^{0}\big(a\sin0+\omega\cos0\big)}{D}=-\frac{1\cdot(0+\omega)}{D}=-\frac{\omega}{D}`,R`$\sin0=0$, $\cos0=1$, $e^0=1$`],
+  [R`F\!\left(\tfrac\tau2\right)=-\frac{e^{-a\tau/2}\big(a\sin\frac{\omega\tau}{2}+\omega\cos\frac{\omega\tau}{2}\big)}{D}`,R`wstawiamy $t=\frac\tau2$`],
+  [R`\int_0^{\tau/2}e^{-at}\sin\omega t\,dt=\frac{\omega}{D}-\frac{e^{-a\tau/2}\big(a\sin\frac{\omega\tau}{2}+\omega\cos\frac{\omega\tau}{2}\big)}{D}`,R`$-F(0)=+\frac\omega D$`]]},
+ {t:R`Wracamy do średniej`,n:R`To są te kropki "= . . ." z tablicy.`,L:[
+  [R`\bar f=\lim_{\tau\to\infty}\frac{A}{\tau}\left[\frac{\omega}{D}-\frac{e^{-a\tau/2}\big(a\sin\frac{\omega\tau}{2}+\omega\cos\frac{\omega\tau}{2}\big)}{D}\right]`,R`wynik całki razy $\frac A\tau$`],
+  [R`=\lim_{\tau\to\infty}\frac{A\,\omega}{D\,\tau}\;-\;\lim_{\tau\to\infty}\frac{A\,e^{-a\tau/2}\big(a\sin\frac{\omega\tau}{2}+\omega\cos\frac{\omega\tau}{2}\big)}{D\,\tau}`,R`granica różnicy = różnica granic (obie zaraz policzymy)`]]},
+ {t:R`Pierwsza granica`,L:[[R`\lim_{\tau\to\infty}\frac{A\,\omega}{D\,\tau}=0`,R`w liczniku stała, mianownik rośnie do nieskończoności`]]},
+ {t:R`Druga granica: sinus i cosinus są ograniczone`,n:R`$\sin\frac{\omega\tau}2$ i $\cos\frac{\omega\tau}2$ nie mają granicy (ciągle się wahają), ale zawsze leżą między $-1$ a $1$. To wystarczy.`,L:[
+  [R`\left|a\sin\tfrac{\omega\tau}{2}+\omega\cos\tfrac{\omega\tau}{2}\right|\le a\cdot1+\omega\cdot1=a+\omega`,R`$|\sin|\le1$, $|\cos|\le1$`],
+  [R`\left|\frac{A\,e^{-a\tau/2}\big(\ldots\big)}{D\,\tau}\right|\le\frac{A\,(a+\omega)}{D}\cdot\frac{e^{-a\tau/2}}{\tau}`,R`szacujemy od góry stałą razy coś`],
+  [R`\frac{e^{-a\tau/2}}{\tau}\xrightarrow[\tau\to\infty]{}0`,R`licznik maleje do $0$, mianownik rośnie`],
+  [R`\lim_{\tau\to\infty}\frac{A\,e^{-a\tau/2}\big(\ldots\big)}{D\,\tau}=0`,R`ograniczone razy coś, co dąży do zera, daje zero (twierdzenie o trzech ciągach)`]]},
+ {t:R`Wynik`,L:[[R`\bar f=0-0=0`,R``]]},
+ {t:R`Dlaczego to ma sens`,n:R`Gdy $\tau\to\infty$, całka dąży do skończonej liczby $\frac{A\omega}{a^2+\omega^2}$: górki są ciut większe od kolejnych dolin, ale wszystko gaśnie. Średnia to to pole podzielone przez $\tau\to\infty$. Skończone przez nieskończone daje $0$. Zasada na przyszłość: <b>sygnał, który gaśnie, ma średnią $0$</b>.`,L:[
+  [R`\int_0^{\infty}f(t)\,dt=A\left(\frac{\omega}{D}-0\right)=\frac{A\,\omega}{a^2+\omega^2}\quad(\text{skończone})\;\Rightarrow\;\bar f=0`,R`dla $\tau\to\infty$ znika człon z $e^{-a\tau/2}$`]]},
+ {t:R`Kontrprzykład: kiedy NIE wychodzi zero`,n:R`Żeby nie myśleć, że ten wzór zawsze daje zero: weźmy stały sygnał włączony w zerze, $A\cdot\mathbf{1}(t)$. On nie gaśnie.`,L:[
+  [R`\bar f=\lim_{\tau\to\infty}\frac1\tau\int_{0}^{\tau/2}A\,dt`,R`$\mathbf{1}(t)$ obcina dolną granicę do zera`],
+  [R`=\lim_{\tau\to\infty}\frac1\tau\cdot A\cdot\frac\tau2=\frac A2`,R`tu pole rośnie razem z $\tau$, więc $\tau$ się skraca`],
+  [R`\bar f=\frac A2`,R`sensowne: połowę osi (przed zerem) sygnał to $0$, połowę $A$`]]},
+ {t:R`Jak to zapisać na kartce (wersja do oddania)`,L:[
+  [R`\bar f=\lim_{\tau\to\infty}\frac1\tau\int_{-\tau/2}^{\tau/2}A\sin(\omega t)\,e^{-at}\,\mathbf{1}(t)\,dt=\lim_{\tau\to\infty}\frac A\tau\int_0^{\tau/2}e^{-at}\sin(\omega t)\,dt`,R`$\omega=\frac{2\pi}T$`],
+  [R`\int e^{-at}\sin(\omega t)\,dt=-\frac{e^{-at}\big(a\sin\omega t+\omega\cos\omega t\big)}{a^2+\omega^2}`,R`dwa razy przez części`],
+  [R`\bar f=\lim_{\tau\to\infty}\frac{A}{\tau\,(a^2+\omega^2)}\Big[\omega-e^{-a\tau/2}\big(a\sin\tfrac{\omega\tau}2+\omega\cos\tfrac{\omega\tau}2\big)\Big]`,R``],
+  [R`\bar f=0`,R`nawias jest ograniczony (najwyżej $\omega+a+\omega$), a $\frac1\tau\to0$`]]}
+];
+
+WZORY.sin={title:'Sinus, okres, wartość średnia',groups:[
+ {g:'Sygnał sinusoidalny',f:[
+  {l:'postać',m:R`x(t)=A\sin(\omega t)\qquad x(t)=A\cos(\omega t)`,n:'A - amplituda, ω - pulsacja [rad/s]'},
+  {l:'okres, częstotliwość, pulsacja',m:R`T=\frac{2\pi}{\omega},\qquad f=\frac1T,\qquad\omega=2\pi f`},
+  {l:'punkty kontrolne co T/4',m:R`\sin:\;0,\;A,\;0,\;-A,\;0\qquad\cos:\;A,\;0,\;-A,\;0,\;A`}]},
+ {g:'Wartość średnia',f:[
+  {l:'sygnał okresowy',m:R`\bar x=\frac1T\int_T x(t)\,dt=\frac{\text{pole w okresie}}{T}`},
+  {l:'sygnał nieokresowy',m:R`\bar x=\lim_{\tau\to\infty}\frac1\tau\int_{-\tau/2}^{\tau/2}x(t)\,dt`},
+  {l:'gotowe wyniki',m:R`\text{prostokąt }A\text{ przez }t_i:\;A\tfrac{t_i}{T}\qquad\text{trójkąt, piła }0\text{ do }A:\;\tfrac A2\qquad\sin,\cos:\;0`}]}
+]};
+METODY.unshift(
+ {id:'sinus',name:'Sinus: wzór <-> wykres',kiedy:'Zadania typu "narysuj 3sin(2πt)" albo "odczytaj wzór z wykresu".',
+  steps:[
+   {t:'Wzór -> wykres',txt:R`Odczytaj $A$ (przed sinusem) i $\omega$ (przy $t$). Policz $T=\frac{2\pi}{\omega}$, podziel okres na 4 części i wstaw 5 punktów.`,m:R`A\sin(\omega t):\;0,\;A,\;0,\;-A,\;0\ \ \text{w}\ \ 0,\tfrac T4,\tfrac T2,\tfrac{3T}4,T`},
+   {t:'Wykres -> wzór',txt:R`$A$ = najwyższy punkt, $T$ = odstęp sąsiednich maksimów, $\omega=\frac{2\pi}{T}$. W $t=0$: zero i w górę = $\sin$, maksimum = $\cos$, zero i w dół = $-\sin$.`,m:R`\omega=\frac{2\pi}{T}`}],
+  pam:R`Dane $f$ zamiast $\omega$? $\omega=2\pi f$, $T=\frac1f$.`},
+ {id:'srednia',name:'Wartość średnia z rysunku',kiedy:'Prostokąty, trójkąty, piły: średnia = pole w okresie / T.',
+  steps:[
+   {t:'Pole zamiast całki',txt:'Jeśli kształt to prostokąt lub trójkąt, policz pole geometrią. Pod osią pole liczy się z minusem.',m:R`\bar x=\frac{\text{pole w okresie}}{T}`},
+   {t:'Całką (jeśli trzeba pokazać rachunek)',txt:'Każdy odcinek prostej: wzór z dwóch punktów, osobna całka, suma, dzielenie przez T.',m:R`\bar x=\frac1T\left(\int_{t_0}^{t_1}x_1\,dt+\int_{t_1}^{t_2}x_2\,dt+\ldots\right)`}],
+  pam:R`Trójkąt i piła od $0$ do $A$: zawsze $\frac A2$. Sinus: $0$. Sygnał gasnący: $0$.`}
+);
+
 /* ======================= RENDER TeX ======================= */
 const KOPT = {throwOnError:false, strict:false, trust:false};
 function K(t, display){ return katex.renderToString(t, Object.assign({displayMode: display!==false}, KOPT)); }
@@ -1550,19 +1954,28 @@ function newtonTable(n,minus){
 }
 
 /* ======================= SIDEBAR ======================= */
-const CATS = [['euler','Wzory Eulera i potęgi'],['srednia','Wartość średnia'],['energia','Energia sygnału'],['moc','Moc sygnału okresowego']];
+const CH1=[['sinwyk','Wzór -> wykres'],['wyksin','Wykres -> wzór'],['sredp','Wartość średnia'],['dom','Zadanie domowe']];
+const CHL=[['euler','Wzory Eulera i potęgi'],['srednia','Wartość średnia'],['energia','Energia sygnału'],['moc','Moc sygnału okresowego']];
 const DONE = new Set();
-function buildSb(){
-  let h = `<div class="ch-head" onclick="toggleCh(1)"><div class="ch-dot c3"></div><div class="ch-lbl">I. Własności sygnałów</div><div class="ch-cnt">${PROBS.length}</div><div class="ch-arr open" id="cha1">&#x203a;</div></div><div id="chb1" class="ch-body" style="display:block">`;
-  CATS.forEach(([key,name])=>{
-    const items = PROBS.filter(p=>p.c===key); if(!items.length) return;
-    h += `<div class="cat-head">${esc(name)}</div>`;
+let ORDER=[];
+function sbChapter(id,title,dot,cats,open){
+  const all=PROBS.filter(p=>p.ch===id);
+  let h=`<div class="ch-head" onclick="toggleCh(${id})"><div class="ch-dot ${dot}"></div><div class="ch-lbl">${esc(title)}</div><div class="ch-cnt">${all.length}</div><div class="ch-arr${open?' open':''}" id="cha${id}">&#x203a;</div></div><div id="chb${id}" class="ch-body" style="display:${open?'block':'none'}">`;
+  cats.forEach(([key,name])=>{
+    const items=all.filter(p=>p.c===key); if(!items.length) return;
+    h+=`<div class="cat-head">${esc(name)}</div>`;
     items.forEach(p=>{
-      h += `<div class="prob-item" id="pi_${p.n}" onclick="show(${p.n})"><div class="prob-num">${p.n}</div><div class="prob-lbl">${esc(p.src.replace(/^zbiór Grajek, Wegner - /,'zbiór, '))}</div><div class="prob-done${DONE.has(p.n)?' vis':''}" id="pd_${p.n}"></div></div>`;
+      ORDER.push(p.n);
+      h+=`<div class="prob-item" id="pi_${p.n}" onclick="show(${p.n})"><div class="prob-num">${esc(p.lab)}</div><div class="prob-lbl">${esc(p.sb||p.src.replace(/^zbiór Grajek, Wegner - /,'zbiór, '))}</div><div class="prob-done${DONE.has(p.n)?' vis':''}" id="pd_${p.n}"></div></div>`;
     });
   });
-  h += `</div><div class="ch-head soon"><div class="ch-dot c2"></div><div class="ch-lbl">II. Szeregi Fouriera</div><div class="ch-cnt">wkrótce</div></div>`+
-       `<div class="ch-head soon"><div class="ch-dot c5"></div><div class="ch-lbl">III. Transformata Fouriera</div><div class="ch-cnt">wkrótce</div></div>`;
+  return h+'</div>';
+}
+function buildSb(){
+  ORDER=[];
+  let h=sbChapter(1,'I. Sinus i wartość średnia','c3',CH1,true)+sbChapter(2,'Na później: energia, moc (zbiór)','c2',CHL,false);
+  h+=`<div class="ch-head soon"><div class="ch-dot c2"></div><div class="ch-lbl">II. Szeregi Fouriera</div><div class="ch-cnt">wkrótce</div></div>`+
+     `<div class="ch-head soon"><div class="ch-dot c5"></div><div class="ch-lbl">III. Transformata Fouriera</div><div class="ch-cnt">wkrótce</div></div>`;
   document.getElementById('sblist').innerHTML = h;
 }
 function toggleCh(ch){
@@ -1575,14 +1988,19 @@ function setActive(id){
 }
 
 /* ======================= WIDOK ZADANIA ======================= */
+function nav(n){
+  const i=ORDER.indexOf(n), P=x=>PROBS.find(q=>q.n===x);
+  const pv=i>0?ORDER[i-1]:null, nx=(i>=0&&i<ORDER.length-1)?ORDER[i+1]:null;
+  return (pv!=null?`<button class="pbtn" onclick="show(${pv})">&lt;- zad. ${esc(P(pv).lab)}</button>`:'<span></span>')+(nx!=null?`<button class="pbtn pri" onclick="show(${nx})">zad. ${esc(P(nx).lab)} -&gt;</button>`:'');
+}
 function show(n){
   const p = PROBS.find(x=>x.n===n); if(!p) return;
   setActive('pi_'+n);
   const steps = p.steps.map((s,i)=>`<div class="step"><div class="sh"><div class="snum c3">${i+1}</div><div class="stitle">${RN(s.t)}</div></div>
      <div class="sbody">${s.n?`<div class="sintro">${RN(s.n)}</div>`:''}${s.m?K(s.m,true):''}${s.L?linesHTML(s.L):''}${s.pascal?`<div id="pas">${pascalBox()}</div>`:''}${s.newton?newtonTable(s.newton.n,s.newton.minus):''}</div></div>`).join('');
   document.getElementById('main').innerHTML = `<div class="sol">
-    <div class="prob-card c3"><span class="pg">${({energia:'E',moc:'P',srednia:'f̄',euler:'e^j'})[p.c]}</span>
-      <div class="prob-meta"><span class="pbadge c3">Zad.&nbsp;${n}</span><span class="pcat">${esc(p.ct)}</span></div>
+    <div class="prob-card c3"><span class="pg">${({energia:'E',moc:'P',srednia:'f̄',euler:'e^j',sinwyk:'∿',wyksin:'∿',sredp:'x̄',dom:'f̄'})[p.c]||''}</span>
+      <div class="prob-meta"><span class="pbadge c3">Zad.&nbsp;${esc(p.lab)}</span><span class="pcat">${esc(p.ct)}</span></div>
       <div class="psrc">${esc(p.src)}</div>
       <div class="ptxt">${RN(p.txt)}</div>
       <div>${K(p.p,true)}</div></div>
@@ -1591,7 +2009,7 @@ function show(n){
     <h3 class="rozw">Rozwiązanie krok po kroku</h3>
     ${steps}
     <div class="ans c3"><span class="ans-ico">✓</span><div class="ans-in"><div class="ans-l c3">Wynik</div><div class="ans-m">${K(p.a,true)}</div></div></div>
-    <div class="navp">${n>1?`<button class="pbtn" onclick="show(${n-1})">&lt;- zad. ${n-1}</button>`:'<span></span>'}${n<PROBS.length?`<button class="pbtn pri" onclick="show(${n+1})">zad. ${n+1} -&gt;</button>`:''}</div>
+    <div class="navp">${nav(n)}</div>
   </div>`;
   document.getElementById('main').scrollTop = 0;
   DONE.add(n); const d = document.getElementById('pd_'+n); if(d) d.classList.add('vis');
@@ -1625,10 +2043,11 @@ function showStart(){
   setActive(null);
   document.getElementById('main').innerHTML = `<div class="wzory-panel intro">
    <h2>Sygnały i systemy - ćwiczenia</h2>
-   <p>Rozdział 1: <b>energia, moc, wartość średnia i skuteczna</b>. To pierwsze zajęcia i zadania 1-2 na kolosie zaliczeniowym (po 100 pkt).</p>
-   <div class="wcard"><div class="wl">jak korzystać</div><p>Każde zadanie ma: treść, metodę jednym zdaniem, <b>wykres rysowany krok po kroku</b> (przyciski "dalej") i rozwiązanie rozpisane od zera. Najpierw spróbuj sam narysować wykres, potem przeklikaj kroki.</p></div>
-   <div class="wcard"><div class="wl">najważniejsza różnica</div>${K(R`E=\int_{-\infty}^{\infty}|f(t)|^2dt\qquad\text{vs}\qquad P=\frac1T\int_T|f(t)|^2dt`,true)}<p>Energia: sygnały, które gasną. Moc: sygnały okresowe.</p></div>
-   <p style="margin-top:14px"><button class="pbtn pri" onclick="show(1)">Zacznij od zad. 1 -&gt;</button> <button class="pbtn" onclick="showMetody()">Metody</button></p></div>`;
+   <p>Rozdział I: <b>sinus (amplituda, okres, ω) i wartość średnia</b>. Najpierw wzór -> wykres, potem wykres -> wzór, potem średnia z prostych sygnałów (prostokąt, trójkąt, piła). Na końcu <b>zadanie domowe D</b> z tablicy, rozpisane krok po kroku.</p>
+   <div class="wcard"><div class="wl">trzy wzory na start</div>${K(R`T=\frac{2\pi}{\omega}\qquad f=\frac1T\qquad \omega=2\pi f`,true)}${K(R`\bar f=\frac1T\int_0^T f(t)\,dt=\frac{\text{pole pod wykresem w okresie}}{T}`,true)}</div>
+   <div class="wcard"><div class="wl">jak korzystać</div><p>Każde zadanie ma <b>wykres rysowany krok po kroku</b> (przyciski "dalej") i rozwiązanie linijka po linijce z wyjaśnieniem obok. Najpierw spróbuj sam, potem przeklikaj.</p></div>
+   <p>Stare, trudniejsze zadania (energia, moc, Euler) są w rozdziale <b>"Na później"</b> w menu, zwinięte.</p>
+   <p style="margin-top:14px"><button class="pbtn pri" onclick="show(${ORDER[0]})">Zacznij od zad. 1 -&gt;</button> <button class="pbtn" onclick="show(33)">Zadanie domowe D</button> <button class="pbtn" onclick="showMetody()">Metody</button></p></div>`;
 }
 
 /* ======================= MOTYW / MOBILE ======================= */
