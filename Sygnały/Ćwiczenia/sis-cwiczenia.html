@@ -1772,28 +1772,28 @@ STEPS[33]=[
   [R`I+\frac{\omega^2}{a^2}\,I=-\frac1a e^{-at}\sin(\omega t)-\frac{\omega}{a^2}e^{-at}\cos(\omega t)`,R`przenosimy $I$ na lewą stronę`],
   [R`\frac{a^2+\omega^2}{a^2}\,I=-\frac{e^{-at}}{a^2}\Big(a\sin(\omega t)+\omega\cos(\omega t)\Big)`,R`z lewej wyciągamy $I$, z prawej $-\frac{e^{-at}}{a^2}$ (bo $\frac1a=\frac{a}{a^2}$)`],
   [R`I=-\frac{e^{-at}\Big(a\sin(\omega t)+\omega\cos(\omega t)\Big)}{a^2+\omega^2}`,R`mnożymy obie strony przez $\frac{a^2}{a^2+\omega^2}$`]]},
- {t:R`Sprawdzenie: pochodna wyniku`,n:R`Nieobowiązkowe, ale daje pewność. Oznaczmy $D=a^2+\omega^2$ i $F(t)=I$. Jeśli $F'(t)=e^{-at}\sin\omega t$, to całka jest dobra.`,L:[
-  [R`F(t)=-\frac1D\,e^{-at}\Big(a\sin\omega t+\omega\cos\omega t\Big)`,R``],
-  [R`F'(t)=-\frac1D\Big[-a\,e^{-at}\big(a\sin\omega t+\omega\cos\omega t\big)+e^{-at}\big(a\omega\cos\omega t-\omega^2\sin\omega t\big)\Big]`,R`pochodna iloczynu: $(gh)'=g'h+gh'$`],
-  [R`=-\frac{e^{-at}}{D}\Big(-a^2\sin\omega t-a\omega\cos\omega t+a\omega\cos\omega t-\omega^2\sin\omega t\Big)`,R`wymnażamy`],
-  [R`=-\frac{e^{-at}}{D}\cdot\Big(-(a^2+\omega^2)\sin\omega t\Big)=e^{-at}\sin\omega t\;\checkmark`,R`$a\omega\cos$ się znoszą, a $a^2+\omega^2=D$ skraca się z mianownikiem`]]},
+ {t:R`Sprawdzenie: pochodna wyniku`,n:R`Nieobowiązkowe, ale daje pewność. Oznaczmy $F(t)=I$. Jeśli $F'(t)=e^{-at}\sin\omega t$, to całka jest dobra.`,L:[
+  [R`F(t)=-\frac{1}{a^2+\omega^2}\,e^{-at}\Big(a\sin\omega t+\omega\cos\omega t\Big)`,R``],
+  [R`F'(t)=-\frac{1}{a^2+\omega^2}\Big[-a\,e^{-at}\big(a\sin\omega t+\omega\cos\omega t\big)+e^{-at}\big(a\omega\cos\omega t-\omega^2\sin\omega t\big)\Big]`,R`pochodna iloczynu: $(gh)'=g'h+gh'$`],
+  [R`=-\frac{e^{-at}}{a^2+\omega^2}\Big(-a^2\sin\omega t-a\omega\cos\omega t+a\omega\cos\omega t-\omega^2\sin\omega t\Big)`,R`wymnażamy`],
+  [R`=-\frac{e^{-at}}{a^2+\omega^2}\cdot\Big(-(a^2+\omega^2)\sin\omega t\Big)=e^{-at}\sin\omega t\;\checkmark`,R`$a\omega\cos$ się znoszą, a $a^2+\omega^2$ skraca się z mianownikiem`]]},
  {t:R`Wstawiamy granice: od $0$ do $\frac\tau2$`,L:[
   [R`\int_0^{\tau/2}e^{-at}\sin\omega t\,dt=F\!\left(\tfrac\tau2\right)-F(0)`,R`górna minus dolna`],
-  [R`F(0)=-\frac{e^{0}\big(a\sin0+\omega\cos0\big)}{D}=-\frac{1\cdot(0+\omega)}{D}=-\frac{\omega}{D}`,R`$\sin0=0$, $\cos0=1$, $e^0=1$`],
-  [R`F\!\left(\tfrac\tau2\right)=-\frac{e^{-a\tau/2}\big(a\sin\frac{\omega\tau}{2}+\omega\cos\frac{\omega\tau}{2}\big)}{D}`,R`wstawiamy $t=\frac\tau2$`],
-  [R`\int_0^{\tau/2}e^{-at}\sin\omega t\,dt=\frac{\omega}{D}-\frac{e^{-a\tau/2}\big(a\sin\frac{\omega\tau}{2}+\omega\cos\frac{\omega\tau}{2}\big)}{D}`,R`$-F(0)=+\frac\omega D$`]]},
+  [R`F(0)=-\frac{e^{0}\big(a\sin0+\omega\cos0\big)}{a^2+\omega^2}=-\frac{1\cdot(0+\omega)}{a^2+\omega^2}=-\frac{\omega}{a^2+\omega^2}`,R`$\sin0=0$, $\cos0=1$, $e^0=1$`],
+  [R`F\!\left(\tfrac\tau2\right)=-\frac{e^{-a\tau/2}\big(a\sin\frac{\omega\tau}{2}+\omega\cos\frac{\omega\tau}{2}\big)}{a^2+\omega^2}`,R`wstawiamy $t=\frac\tau2$`],
+  [R`\int_0^{\tau/2}e^{-at}\sin\omega t\,dt=\frac{\omega}{a^2+\omega^2}-\frac{e^{-a\tau/2}\big(a\sin\frac{\omega\tau}{2}+\omega\cos\frac{\omega\tau}{2}\big)}{a^2+\omega^2}`,R`$-F(0)=+\frac{\omega}{a^2+\omega^2}$`]]},
  {t:R`Wracamy do średniej`,n:R`To są te kropki "= . . ." z tablicy.`,L:[
-  [R`\bar f=\lim_{\tau\to\infty}\frac{A}{\tau}\left[\frac{\omega}{D}-\frac{e^{-a\tau/2}\big(a\sin\frac{\omega\tau}{2}+\omega\cos\frac{\omega\tau}{2}\big)}{D}\right]`,R`wynik całki razy $\frac A\tau$`],
-  [R`=\lim_{\tau\to\infty}\frac{A\,\omega}{D\,\tau}\;-\;\lim_{\tau\to\infty}\frac{A\,e^{-a\tau/2}\big(a\sin\frac{\omega\tau}{2}+\omega\cos\frac{\omega\tau}{2}\big)}{D\,\tau}`,R`granica różnicy = różnica granic (obie zaraz policzymy)`]]},
- {t:R`Pierwsza granica`,L:[[R`\lim_{\tau\to\infty}\frac{A\,\omega}{D\,\tau}=0`,R`w liczniku stała, mianownik rośnie do nieskończoności`]]},
+  [R`\bar f=\lim_{\tau\to\infty}\frac{A}{\tau}\left[\frac{\omega}{a^2+\omega^2}-\frac{e^{-a\tau/2}\big(a\sin\frac{\omega\tau}{2}+\omega\cos\frac{\omega\tau}{2}\big)}{a^2+\omega^2}\right]`,R`wynik całki razy $\frac A\tau$`],
+  [R`=\lim_{\tau\to\infty}\frac{A\,\omega}{(a^2+\omega^2)\,\tau}\;-\;\lim_{\tau\to\infty}\frac{A\,e^{-a\tau/2}\big(a\sin\frac{\omega\tau}{2}+\omega\cos\frac{\omega\tau}{2}\big)}{(a^2+\omega^2)\,\tau}`,R`granica różnicy = różnica granic (obie zaraz policzymy)`]]},
+ {t:R`Pierwsza granica`,L:[[R`\lim_{\tau\to\infty}\frac{A\,\omega}{(a^2+\omega^2)\,\tau}=0`,R`w liczniku stała, mianownik rośnie do nieskończoności`]]},
  {t:R`Druga granica: sinus i cosinus są ograniczone`,n:R`$\sin\frac{\omega\tau}2$ i $\cos\frac{\omega\tau}2$ nie mają granicy (ciągle się wahają), ale zawsze leżą między $-1$ a $1$. To wystarczy.`,L:[
   [R`\left|a\sin\tfrac{\omega\tau}{2}+\omega\cos\tfrac{\omega\tau}{2}\right|\le a\cdot1+\omega\cdot1=a+\omega`,R`$|\sin|\le1$, $|\cos|\le1$`],
-  [R`\left|\frac{A\,e^{-a\tau/2}\big(\ldots\big)}{D\,\tau}\right|\le\frac{A\,(a+\omega)}{D}\cdot\frac{e^{-a\tau/2}}{\tau}`,R`szacujemy od góry stałą razy coś`],
+  [R`\left|\frac{A\,e^{-a\tau/2}\big(\ldots\big)}{(a^2+\omega^2)\,\tau}\right|\le\frac{A\,(a+\omega)}{a^2+\omega^2}\cdot\frac{e^{-a\tau/2}}{\tau}`,R`szacujemy od góry stałą razy coś`],
   [R`\frac{e^{-a\tau/2}}{\tau}\xrightarrow[\tau\to\infty]{}0`,R`licznik maleje do $0$, mianownik rośnie`],
-  [R`\lim_{\tau\to\infty}\frac{A\,e^{-a\tau/2}\big(\ldots\big)}{D\,\tau}=0`,R`ograniczone razy coś, co dąży do zera, daje zero (twierdzenie o trzech ciągach)`]]},
+  [R`\lim_{\tau\to\infty}\frac{A\,e^{-a\tau/2}\big(\ldots\big)}{(a^2+\omega^2)\,\tau}=0`,R`ograniczone razy coś, co dąży do zera, daje zero (twierdzenie o trzech ciągach)`]]},
  {t:R`Wynik`,L:[[R`\bar f=0-0=0`,R``]]},
  {t:R`Dlaczego to ma sens`,n:R`Gdy $\tau\to\infty$, całka dąży do skończonej liczby $\frac{A\omega}{a^2+\omega^2}$: górki są ciut większe od kolejnych dolin, ale wszystko gaśnie. Średnia to to pole podzielone przez $\tau\to\infty$. Skończone przez nieskończone daje $0$. Zasada na przyszłość: <b>sygnał, który gaśnie, ma średnią $0$</b>.`,L:[
-  [R`\int_0^{\infty}f(t)\,dt=A\left(\frac{\omega}{D}-0\right)=\frac{A\,\omega}{a^2+\omega^2}\quad(\text{skończone})\;\Rightarrow\;\bar f=0`,R`dla $\tau\to\infty$ znika człon z $e^{-a\tau/2}$`]]},
+  [R`\int_0^{\infty}f(t)\,dt=A\left(\frac{\omega}{a^2+\omega^2}-0\right)=\frac{A\,\omega}{a^2+\omega^2}\quad(\text{skończone})\;\Rightarrow\;\bar f=0`,R`dla $\tau\to\infty$ znika człon z $e^{-a\tau/2}$`]]},
  {t:R`Kontrprzykład: kiedy NIE wychodzi zero`,n:R`Żeby nie myśleć, że ten wzór zawsze daje zero: weźmy stały sygnał włączony w zerze, $A\cdot\mathbf{1}(t)$. On nie gaśnie.`,L:[
   [R`\bar f=\lim_{\tau\to\infty}\frac1\tau\int_{0}^{\tau/2}A\,dt`,R`$\mathbf{1}(t)$ obcina dolną granicę do zera`],
   [R`=\lim_{\tau\to\infty}\frac1\tau\cdot A\cdot\frac\tau2=\frac A2`,R`tu pole rośnie razem z $\tau$, więc $\tau$ się skraca`],
